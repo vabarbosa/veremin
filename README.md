@@ -1,10 +1,10 @@
 # Veremin
 
-This repository contains a video theremin based on [PoseNet](https://github.com/tensorflow/tfjs-models/tree/master/posenet).
+Veremin is a video theremin. It is the brainchild of [John Cohn](https://github.com/johncohn) and based on [PoseNet](https://github.com/tensorflow/tfjs-models/tree/master/posenet) TensorFlow.js model.
 
-The PoseNet [Camera Demo](https://github.com/tensorflow/tfjs-models/tree/master/posenet/demos#demo-1-camera) is modified to allow you to make music by moving your hands/arms in front of a web camera.
+It takes the PoseNet [Camera Demo](https://github.com/tensorflow/tfjs-models/tree/master/posenet/demos#demo-1-camera) and modifies it to allow you to make music by moving your hands/arms in front of a web camera.
 
-PoseNet is used to predict the position of your wrists within the video. The app takes the prediction and converts them to raw MIDI values which get sent to a connected MIDI device.
+PoseNet is used to predict the location of your wrists within the video. The app takes the prediction and converts them to raw MIDI values which get sent to a connected MIDI device.
 
 The app is currently a **work in progress** and only supports the Chrome browser (version 43 or later).
 
@@ -19,7 +19,7 @@ The app is currently a **work in progress** and only supports the Chrome browser
 
 ## Live demo
 
-To see this app in action without installing anything, simply visit https://veremin.mybluemix.net with a Chrome browser. You will want to have a MIDI synthesizer (hardware or software) connected. See the [Using the app]((https://github.com/vabarbosa/veremin#using-the-app)) section for more information.
+To see this app in action without installing anything, simply visit https://veremin.mybluemix.net with a Chrome browser. You will want to have a MIDI synthesizer (hardware or software) connected. See the [Using the app]((https://github.com/vabarbosa/veremin#using-the-app)) section below for more information.
 
 
 ## Steps
