@@ -47,7 +47,7 @@ To deploy to the IBM Cloud, from a terminal run:
     $ git clone https://github.com/vabarbosa/veremin
     ```
 
-1. Change to the directory of the cloned repo
+1. Change to the directory of the cloned repo:
 
     ```
     $  cd veremin
@@ -65,7 +65,7 @@ To deploy to the IBM Cloud, from a terminal run:
     $ ibmcloud target --cf
     ```
 
-1. Push the app to IBM Cloud
+1. Push the app to IBM Cloud:
 
     ```
     $ ibmcloud cf push
@@ -76,21 +76,15 @@ To deploy to the IBM Cloud, from a terminal run:
 
 ### Run locally
 
-To run the app locally, from a terminal run:
+To run the app locally:
 
-1. Clone the `veremin` locally:
+1. From a terminal, clone the `veremin` locally:
 
     ```
     $ git clone https://github.com/vabarbosa/veremin
     ```
 
-1. Change to the directory of the cloned repo
-
-    ```
-    $  cd veremin
-    ```
-
-1. Point your web server to your app directory and start it up. If you want to use the **Web Server for Chrome** (and have installed it from the Chrome Web Store)
+1. Point your web server to your app directory and start it up. If you want to use the **Web Server for Chrome** (after installing it from the Chrome Web Store):
 
     1. Go to your Chrome browser's Apps page
     1. Click on the **Web Server**
@@ -102,15 +96,15 @@ To run the app locally, from a terminal run:
 
 ## Using the app
 
-Connect and configure a MIDI synthesizer to your computer. If you do not have a MIDI synthesizer you can try a software synthesizer such as [SimpleSynth](http://notahat.com/simplesynth/). If no (hardware or software) synthesizer is detected the app defaults to using the Web Audio API to generate tones from the browser.
+Before using the app, connect a MIDI synthesizer to your computer. If you do not have a MIDI synthesizer you can download and run a software synthesizer such as [SimpleSynth](http://notahat.com/simplesynth/). If no (hardware or software) synthesizer is detected the app defaults to using the Web Audio API to generate tones from the browser.
 
-You will need to view the app with Chrome and accept the prompt to allow access the web camera. Once accepted the PoseNet model gets loaded (it may take a few seconds).
+You will need to view the app with Chrome and accept the prompt to allow access the web camera. Once allowed, the PoseNet model gets loaded (it may take a few seconds).
 
 After the model is loaded, the video will load and include an overlay with skeleton and joints information detected by PoseNet. The overlay also include two adjacent boxes. When your wrists are within each of the boxes, you should here some tones.
 
-You can move your arm/hands around to generate different tones to send to the connected MIDI device.
+You can move your arm/hands up and down to generate different tones to send to the connected MIDI device. You can move your arms/hands left and right to adjust the volume of the tone.
 
-Click on **Open Controls** to open the control panel. In the control panel you are able to change MIDI device, view the raw MIDI values being sent, configurable PoseNet settings, and additional optionals to configure the for the video.
+Click on **Open Controls** to open the control panel. In the control panel you are able to change MIDI device (if more than one is connected), view the raw MIDI values being sent, configurable PoseNet settings, and set additional optionals for the video.
 
 ## Links
 
