@@ -1,0 +1,4 @@
+.cfignore
+.DS_Store
+.vscode
+manifest.yml

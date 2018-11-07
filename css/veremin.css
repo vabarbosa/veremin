@@ -1,0 +1,118 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,700');
+
+* {
+  margin: 0;
+  padding: 0;
+  vertical-align: top;
+}
+
+body {
+  background-color: #111111;
+  color: whitesmoke;
+  font-family: 'IBM Plex Sans', sans-serif;
+  height: 100%;
+}
+
+body, div {
+  padding: 0;
+  margin: 0;
+}
+
+.background {
+  background: url("../img/andrey-konstantinov-683960-unsplash.jpg") right center no-repeat;
+  background-size: cover;
+  background-attachment: fixed;
+  height: 100vh;
+  z-index: -10;
+
+  -webkit-filter: blur(1px);
+  -moz-filter: blur(1px);
+  -o-filter: blur(1px);
+  -ms-filter: blur(1px);
+  filter: blur(1px);
+}
+
+.background > div {
+  background-color: #111111;
+  height: 100vh;
+  opacity: 0.5;
+}
+
+.foreground {
+  display: flex;
+  flex-flow: column;
+  height: calc(100vh - 50px);
+  left: 0px;
+  padding: 25px 50px;
+  position: fixed;
+  top: 0px;
+  width: calc(100vw - 100px);
+}
+
+header > h1 {
+  font-size: 48px;
+  margin-bottom: -5px;
+}
+
+header > span {
+  font-size: small;
+  font-style: italic;
+  color: lightblue;
+  padding-left: 32px;
+}
+
+footer {
+  color: gray;
+  font-size: x-small;
+  position: fixed;
+  bottom: 0px;
+  left: 0;
+  padding: 10px;
+  width: 100%;
+  background-color: rgba(0,0,0, 0.25);
+}
+
+footer > span:last-of-type {
+  display: inline-block;
+  position: absolute;
+  right: 30px;
+}
+
+.mainwrapper {
+  height: calc(100% - 95px);
+  margin: 5px;
+  position: relative;
+}
+
+#loading {
+  text-align: center;
+  margin-top: 100px;
+}
+
+#main {
+  text-align: center;
+  min-height: calc(100% - 10px);
+}
+
+.videowrapper {
+  display: inline-block;
+  background-color: whitesmoke;
+  
+  -webkit-box-shadow: 0 8px 10px -5px rgba(255,255,255, 0.3);
+  -moz-box-shadow: 0 8px 10px -5px rgba(255,255,255, 0.3);
+  box-shadow: 0 8px 10px -5px rgba(255,255,255, 0.3);
+}
+
+video {
+  -moz-transform: scaleX(-1);
+  -o-transform: scaleX(-1);
+  -webkit-transform: scaleX(-1);
+  transform: scaleX(-1);
+  display: none;
+}
+
+canvas {
+  background-color: whitesmoke;
+}
