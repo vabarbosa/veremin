@@ -19,7 +19,7 @@ The app is currently a **work in progress** and only supports the Chrome browser
 
 ## Live demo
 
-To see this app in action without installing anything, simply visit https://veremin.mybluemix.net with a Chrome browser. You will want to have a MIDI synthesizer (hardware or software) connected. See the [Using the app]((https://github.com/vabarbosa/veremin#using-the-app)) section below for more information.
+To see this app in action without installing anything, simply visit https://veremin.mybluemix.net with a Chrome browser. You will want to have a MIDI synthesizer (hardware or software) connected. See the [Using the app](https://github.com/vabarbosa/veremin#using-the-app) section below for more information.
 
 
 ## Steps
