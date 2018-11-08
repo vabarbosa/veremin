@@ -110,11 +110,8 @@ async function setupGui(cameras, net) {
   const midiDeviceController = gui.add(guiState, 'midiDevice', ['browser'].concat(mouts))
 
   let msgMidi = gui.addFolder("MIDI Message")
-  const minNote = 0
-  const maxNote = 200
-
-  msgMidi.add(guiState.midiMessage, 'leftNote', minNote, maxNote).listen()
-  msgMidi.add(guiState.midiMessage, 'rightNote', minNote, maxNote).listen()
+  msgMidi.add(guiState.midiMessage, 'leftNote', 0, 127).listen()
+  msgMidi.add(guiState.midiMessage, 'rightNote', 0, 127).listen()
   msgMidi.add(guiState.midiMessage, 'leftVelocity', 0, 127).listen()
   msgMidi.add(guiState.midiMessage, 'rightVelocity', 0, 127).listen()
   msgMidi.open()
