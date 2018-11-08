@@ -245,10 +245,12 @@ function detectPoseInRealTime(video, net) {
               && rightWrist.position.x <= qWidth
               && rightWrist.position.y <= qHeight) {
 
-            let lnote  = computeNote(leftWrist.position.y, 0, qHeight)
-            let rnote  = computeNote(rightWrist.position.y, 0, qHeight)
-            let lvelo = Math.abs(127 - Math.round(127 * leftWrist.position.x/qWidth))
-            let rvelo = 127 - Math.round(127 * rightWrist.position.x/qWidth)
+            let lnote  = computeNote(leftWrist.position.y, 0, qHeight)        // right wrist top-to-bottom: (0, qHeight)
+            let rnote  = computeNote(rightWrist.position.y, 0, qHeight)       // left wrist top-to-bottom: (0, qHeight)
+            let lvelo = Math.round(127 * leftWrist.position.x/qWidth) - 127   // right wrist left-to-right: (qWidth, videoWidth) => 0 - 127
+            let rvelo = Math.round(127 * (qWidth + rightWrist.position.x)/qWidth) - 127   // left wrist left-to-right: (0, qWidth) => 0 - 127
+
+            // console.log(`lnote=${lnote}, lvelo=${lvelo}, rnote=${rnote}, rvelo=${rvelo}`)
 
             guiState.midiMessage.leftNote = lnote
             guiState.midiMessage.leftVelocity = lvelo
@@ -256,7 +258,7 @@ function detectPoseInRealTime(video, net) {
             guiState.midiMessage.rightVelocity = rvelo
 
             sendMidiNote(lnote, lvelo)
-            sendMidiNote(rnote, rvelo)
+            sendMidiNote(rnote, lvelo)
           }
         }
       
