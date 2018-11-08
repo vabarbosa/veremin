@@ -62,6 +62,7 @@ async function loadVideo() {
 }
 
 let guiState = {
+  algorithm: 'multi-pose',
   midiDevice: 'browser',
   midiMessage: {
     leftNote: 70,
@@ -77,6 +78,12 @@ let guiState = {
   singlePoseDetection: {
     minPoseConfidence: 0.1,
     minPartConfidence: 0.5,
+  },
+  multiPoseDetection: {
+    maxPoseDetections: 5,
+    minPoseConfidence: 0.15,
+    minPartConfidence: 0.1,
+    nmsRadius: 30.0,
   },
   output: {
     showVideo: true,
@@ -99,6 +106,11 @@ async function setupGui(cameras, net) {
   }
 
   const gui = new dat.GUI({width: 300});
+
+  // The single-pose algorithm is faster and simpler but requires only one
+  // person to be in the frame or results will be innaccurate. Multi-pose works
+  // for more than 1 person
+  const algorithmController = gui.add(guiState, 'algorithm', ['multi-pose', 'single-pose' ]);
 
   const mOutputs = await getMidiDevices()
   let mouts = Object.keys(mOutputs)
@@ -145,6 +157,22 @@ async function setupGui(cameras, net) {
   single.add(guiState.singlePoseDetection, 'minPoseConfidence', 0.0, 1.0);
   single.add(guiState.singlePoseDetection, 'minPartConfidence', 0.0, 1.0);
 
+  let multi = gui.addFolder('Multi Pose Detection');
+  multi
+    .add(guiState.multiPoseDetection, 'maxPoseDetections')
+    .min(1)
+    .max(20)
+    .step(1);
+  multi.add(guiState.multiPoseDetection, 'minPoseConfidence', 0.0, 1.0);
+  multi.add(guiState.multiPoseDetection, 'minPartConfidence', 0.0, 1.0);
+  // nms Radius: controls the minimum distance between poses that are returned
+  // defaults to 20, which is probably fine for most use cases
+  multi
+    .add(guiState.multiPoseDetection, 'nmsRadius')
+    .min(0.0)
+    .max(40.0);
+  multi.open();
+
   let output = gui.addFolder('Output');
   output.add(guiState.output, 'showVideo');
   output.add(guiState.output, 'showSkeleton');
@@ -155,6 +183,19 @@ async function setupGui(cameras, net) {
 
   architectureController.onChange(function(architecture) {
     guiState.changeToArchitecture = architecture;
+  });
+
+  algorithmController.onChange(function(value) {
+    switch (guiState.algorithm) {
+      case 'single-pose':
+        multi.close();
+        single.open();
+        break;
+      case 'multi-pose':
+        single.close();
+        multi.open();
+        break;
+    }
   });
 
   midiDeviceController.onChange(function (value) {
@@ -199,16 +240,34 @@ function detectPoseInRealTime(video, net) {
     let minPoseConfidence;
     let minPartConfidence;
 
-    const pose = await guiState.net.estimateSinglePose(
-      video,
-      imageScaleFactor,
-      flipHorizontal,
-      outputStride
-    );
-    poses.push(pose);
+    switch (guiState.algorithm) {
+      case 'single-pose':
+        const pose = await guiState.net.estimateSinglePose(
+          video,
+          imageScaleFactor,
+          flipHorizontal,
+          outputStride
+        );
+        poses.push(pose);
 
-    minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
-    minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
+        minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
+        minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
+        break;
+      case 'multi-pose':
+        poses = await guiState.net.estimateMultiplePoses(
+          video,
+          imageScaleFactor,
+          flipHorizontal,
+          outputStride,
+          guiState.multiPoseDetection.maxPoseDetections,
+          guiState.multiPoseDetection.minPartConfidence,
+          guiState.multiPoseDetection.nmsRadius
+        );
+
+        minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
+        minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
+        break;
+    }
 
     ctx.clearRect(0, 0, videoWidth, videoHeight);
 
