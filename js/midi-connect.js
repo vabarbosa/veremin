@@ -2,7 +2,6 @@
 const CHANNEL = 1 // channels 1-16
 const NOTEOFF = (0x8 << 4) + (CHANNEL - 1) // equals 128 (with channel = 1)
 const NOTEON =  (0x9 << 4) + (CHANNEL - 1) // equals 144 (with channel = 1)
-const NOTEDURATION = 300 // in ms
 
 let selectedMidiDevice = null
 let audioCtx = null
@@ -52,7 +51,7 @@ export function setPreferredDevice (name) {
   selectedMidiDevice = (name === 'browser') ? null : midiOutputs[name]
 }
 
-export function sendMidiNote (note, velocity) {
+export function sendMidiNote (note, velocity, duration = 300) {
   if (note && velocity) {
     console.log(`NOTEON('${note},${velocity}')`)
 
@@ -71,7 +70,7 @@ export function sendMidiNote (note, velocity) {
           noteOff()
         }
       },
-      NOTEDURATION
+      duration
     )
   }
 }

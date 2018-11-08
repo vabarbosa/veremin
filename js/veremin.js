@@ -64,6 +64,7 @@ async function loadVideo() {
 let guiState = {
   algorithm: 'multi-pose',
   midiDevice: 'browser',
+  noteDuration: 300,
   midiMessage: {
     leftNote: 70,
     leftVelocity: 75,
@@ -120,6 +121,7 @@ async function setupGui(cameras, net) {
   }
 
   const midiDeviceController = gui.add(guiState, 'midiDevice', ['browser'].concat(mouts))
+  const noteDurationController = gui.add(guiState, 'noteDuration', 100, 2000, 50)
 
   let msgMidi = gui.addFolder("MIDI Message")
   msgMidi.add(guiState.midiMessage, 'leftNote', 0, 127).listen()
@@ -301,15 +303,15 @@ function detectPoseInRealTime(video, net) {
               && rightWrist.position.x <= qWidth
               && rightWrist.position.y <= qHeight) {
 
-            let ynote1  = computeNote(rightWrist.position.y, 0, qHeight)       // NOTE- left wrist top-to-bottom
-            let ynote2  = computeNote(leftWrist.position.y, 0, qHeight)        // NOTE- right wrist top-to-bottom
-            let xvelo1 = Math.round(127 * (qWidth + rightWrist.position.x)/qWidth) - 127   // VELOCITY- left wrist left-to-right
-            let xvelo2 = Math.round(127 * leftWrist.position.x/qWidth) - 127   // VELOCITY- right wrist left-to-right
+            let ynote1 = 127 - computeNote(rightWrist.position.y, 0, qHeight)     // NOTE-     left wrist  (low-to-high) bottom-to-top
+            let ynote2 = 127 - computeNote(leftWrist.position.y, 0, qHeight)      // NOTE-     right wrist (low-to-high) bottom-to-top
+            let xvelo1 = 127 - Math.round(127 * rightWrist.position.x/qWidth)     // VELOCITY- left wrist  (low-to-high) right-to-left
+            let xvelo2 = Math.round(127 * leftWrist.position.x/qWidth) - 127      // VELOCITY- right wrist (low-to-high) left-to-right
 
-            let xnote1 = computeNote(rightWrist.position.x, 0, qWidth)            // NOTE- left wrist left-to-right
-            let xnote2 = computeNote((leftWrist.position.x - qWidth), 0, qWidth)  // NOTE- right wrist left-to-right
-            let yvelo1 = 127 - Math.round(127 * rightWrist.position.y/qHeight)    // VELOCITY- left wrist top-to-bottom
-            let yvelo2 = 127 - Math.round(127 * leftWrist.position.y/qHeight)     // VELOCITY- right wrist top-to-bottom
+            let xnote1 = 127 - computeNote(rightWrist.position.x, 0, qWidth)      // NOTE-     left wrist  (low-to-high) right-to-left
+            let xnote2 = computeNote((leftWrist.position.x - qWidth), 0, qWidth)  // NOTE-     right wrist (low-to-high) left-to-right
+            let yvelo1 = 127 - Math.round(127 * rightWrist.position.y/qHeight)    // VELOCITY- left wrist  (low-to-high) bottom-to-top
+            let yvelo2 = 127 - Math.round(127 * leftWrist.position.y/qHeight)     // VELOCITY- right wrist (low-to-high) bottom-to-top
 
             // console.log(`ynote1=${ynote1}, ynote2=${ynote2}, xvelo1=${xvelo1}, xvelo2=${xvelo2}`)
             // console.log(`xnote1=${xnote1}, xnote2=${xnote2}, yvelo1=${yvelo1}, yvelo2=${yvelo2}`)
@@ -319,8 +321,8 @@ function detectPoseInRealTime(video, net) {
             guiState.midiMessage.rightNote = xnote2
             guiState.midiMessage.rightVelocity = yvelo2
 
-            sendMidiNote(xnote1, yvelo2)
-            sendMidiNote(xnote2, yvelo2)
+            sendMidiNote(ynote2, xvelo1, guiState.noteDuration)
+            // sendMidiNote(xnote2, yvelo2, guiState.noteDuration)
           }
         }
       
