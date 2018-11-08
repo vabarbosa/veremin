@@ -245,20 +245,26 @@ function detectPoseInRealTime(video, net) {
               && rightWrist.position.x <= qWidth
               && rightWrist.position.y <= qHeight) {
 
-            let lnote  = computeNote(leftWrist.position.y, 0, qHeight)        // right wrist top-to-bottom: (0, qHeight)
-            let rnote  = computeNote(rightWrist.position.y, 0, qHeight)       // left wrist top-to-bottom: (0, qHeight)
-            let lvelo = Math.round(127 * leftWrist.position.x/qWidth) - 127   // right wrist left-to-right: (qWidth, videoWidth) => 0 - 127
-            let rvelo = Math.round(127 * (qWidth + rightWrist.position.x)/qWidth) - 127   // left wrist left-to-right: (0, qWidth) => 0 - 127
+            let ynote1  = computeNote(rightWrist.position.y, 0, qHeight)       // NOTE- left wrist top-to-bottom
+            let ynote2  = computeNote(leftWrist.position.y, 0, qHeight)        // NOTE- right wrist top-to-bottom
+            let xvelo1 = Math.round(127 * (qWidth + rightWrist.position.x)/qWidth) - 127   // VELOCITY- left wrist left-to-right
+            let xvelo2 = Math.round(127 * leftWrist.position.x/qWidth) - 127   // VELOCITY- right wrist left-to-right
 
-            // console.log(`lnote=${lnote}, lvelo=${lvelo}, rnote=${rnote}, rvelo=${rvelo}`)
+            let xnote1 = computeNote(rightWrist.position.x, 0, qWidth)            // NOTE- left wrist left-to-right
+            let xnote2 = computeNote((leftWrist.position.x - qWidth), 0, qWidth)  // NOTE- right wrist left-to-right
+            let yvelo1 = 127 - Math.round(127 * rightWrist.position.y/qHeight)    // VELOCITY- left wrist top-to-bottom
+            let yvelo2 = 127 - Math.round(127 * leftWrist.position.y/qHeight)     // VELOCITY- right wrist top-to-bottom
 
-            guiState.midiMessage.leftNote = lnote
-            guiState.midiMessage.leftVelocity = lvelo
-            guiState.midiMessage.rightNote = rnote
-            guiState.midiMessage.rightVelocity = rvelo
+            // console.log(`ynote1=${ynote1}, ynote2=${ynote2}, xvelo1=${xvelo1}, xvelo2=${xvelo2}`)
+            // console.log(`xnote1=${xnote1}, xnote2=${xnote2}, yvelo1=${yvelo1}, yvelo2=${yvelo2}`)
 
-            sendMidiNote(lnote, lvelo)
-            sendMidiNote(rnote, lvelo)
+            guiState.midiMessage.leftNote = xnote1
+            guiState.midiMessage.leftVelocity = yvelo1
+            guiState.midiMessage.rightNote = xnote2
+            guiState.midiMessage.rightVelocity = yvelo2
+
+            sendMidiNote(xnote1, yvelo2)
+            sendMidiNote(xnote2, yvelo2)
           }
         }
       

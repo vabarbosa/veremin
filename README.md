@@ -102,7 +102,7 @@ You will need to view the app with Chrome and accept the prompt to allow access 
 
 After the model is loaded, the video will load and include an overlay with skeleton and joints information detected by PoseNet. The overlay also include two adjacent boxes. When your wrists are within each of the boxes, you should here some tones.
 
-You can move your arm/hands up and down to generate different tones to send to the connected MIDI device. You can move your arms/hands left and right to adjust the volume of the tone.
+You can move your arms left and right to generate different tones to send to the connected MIDI device. You can move your right arm up and down to adjust the volume of the tone.
 
 Click on **Open Controls** to open the control panel. In the control panel you are able to change MIDI device (if more than one is connected), view the raw MIDI values being sent, configurable PoseNet settings, and set additional optionals for the video.
 
