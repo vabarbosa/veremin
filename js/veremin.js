@@ -13,6 +13,7 @@ const LEFTWRIST = 9
 const RIGHTWRIST = 10
 const ZONEWIDTH = VIDEOWIDTH * 0.5
 const ZONEHEIGHT = VIDEOHEIGHT * 0.667
+const ZONEOFFSET = 10
 
 let posenetModel = null
 
@@ -101,8 +102,10 @@ const detectPoseInRealTime = function (video) {
     }
 
     if (guiState.output.showZones) {
-      drawBox(ZONEWIDTH, 10, VIDEOWIDTH - 10, ZONEHEIGHT, canvasCtx)
-      drawBox(10, 10, ZONEWIDTH, ZONEHEIGHT, canvasCtx)
+      // draw left zone
+      drawBox(ZONEOFFSET, ZONEOFFSET, ZONEWIDTH, ZONEHEIGHT, canvasCtx)
+      // draw right zone
+      drawBox(ZONEWIDTH, ZONEOFFSET, VIDEOWIDTH - ZONEOFFSET, ZONEHEIGHT, canvasCtx)
     }
 
     // For each pose (i.e. person) detected in an image, loop through the poses and
@@ -152,25 +155,32 @@ const detectPoseInRealTime = function (video) {
 const convertToMIDI = function (leftWrist, rightWrist) {
   const leftZone = rightWrist.position
   const rightZone = leftWrist.position
+
+  const leftEdge = ZONEOFFSET
+  const verticalSplit = ZONEWIDTH
+  const rightEdge = VIDEOWIDTH - ZONEOFFSET
+  const topEdge = ZONEOFFSET
+  const bottomEdge = ZONEHEIGHT
+
   let midiData = []
 
-  if (rightZone.x >= ZONEWIDTH &&
-      rightZone.y <= ZONEHEIGHT &&
-      leftZone.x <= ZONEWIDTH &&
-      leftZone.y <= ZONEHEIGHT) {
-    // vertical (both zones):   low-to-high => bottom-to-top => ZONEHEIGHT-to-0
-    // horizontal (left zone):  low-to-high => right-to-left => ZONEWIDTH-to-0
-    // horizontal (right zone): low-to-high => left-to-right => ZONEWIDTH-to-VIDEOWIDTH
+  if (rightZone.x >= verticalSplit && rightZone.x <= rightEdge &&
+      rightZone.y <= bottomEdge && rightZone.y >= topEdge &&
+      leftZone.x >= leftEdge && leftZone.x <= verticalSplit &&
+      leftZone.y <= bottomEdge && leftZone.y >= topEdge) {
+    // vertical scale (both zones):   low-to-high => bottomEdge-to-topEdge
+    // horizontal scale (left zone):  low-to-high => verticalSplit-to-leftEdge
+    // horizontal scale (right zone): low-to-high => verticalSplit-to-rightEdge
 
     let chordsArray = []
     if (guiState.chordScale !== 'default' && chords.hasOwnProperty(guiState.chordScale)) {
       chordsArray = chords[guiState.chordScale]
     }
 
-    const leftHorVelo = computeVelocity(leftZone.x, ZONEWIDTH, 0)
-    // const rightHorVelo = computeVelocity(rightZone.x, ZONEWIDTH, VIDEOWIDTH)
-    // const leftVertNote = computeNote(leftZone.y, ZONEHEIGHT, 0, chordsArray)
-    const rightVertNote = computeNote(rightZone.y, ZONEHEIGHT, 0, chordsArray)
+    const leftHorVelo = computeVelocity(leftZone.x, verticalSplit, leftEdge)
+    // const rightHorVelo = computeVelocity(rightZone.x, verticalSplit, rightEdge)
+    // const leftVertNote = computeNote(leftZone.y, bottomEdge, topEdge, chordsArray)
+    const rightVertNote = computeNote(rightZone.y, bottomEdge, topEdge, chordsArray)
 
     // console.log(`${leftHorVelo}=leftHorVelo, ${rightVertNote}=rightVertNote`)
 

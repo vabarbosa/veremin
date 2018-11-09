@@ -82,6 +82,10 @@ export function sendMidiNote (note, velocity, duration = 300) {
   if (note && velocity) {
     // console.log(`NOTEON('${note}, ${velocity}')`)
 
+    // keep note & velocity within appropriate range (0 - 127)
+    note = note < 0 ? 0 : (note > 127 ? 127 : note)
+    velocity = velocity < 0 ? 0 : (velocity > 127 ? 127 : velocity)
+
     if (selectedMidiDevice) {
       selectedMidiDevice.send([NOTEON, note, velocity])
     } else {
