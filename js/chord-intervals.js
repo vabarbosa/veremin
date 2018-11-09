@@ -1,6 +1,6 @@
 /**
- * Chord Scale - these are the MIDI notes to select from based on the wrist position.
- * New Chord Scales can be added and they should show up in the control panel (after
+ * Chord Intervals - these are the MIDI notes to select from when computing the note values.
+ * New Chord Intervals can be added and they should show up in the control panel (after
  * redeployment), but remember acceptable MIDI values are between 0 and 127
  */
 export const chords = {

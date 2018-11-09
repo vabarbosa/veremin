@@ -1,7 +1,7 @@
 /* global dat */
 
 import { getMidiDevices, setPreferredDevice } from './midi-connect.js'
-import { chords } from './chords.js'
+import { chords } from './chord-intervals.js'
 
 /**
  *  Defines control panel settings and default values
@@ -9,7 +9,7 @@ import { chords } from './chords.js'
 export let guiState = {
   algorithm: 'multi-pose',
   midiDevice: 'browser',
-  chordScale: 'default',
+  chordIntervals: 'default',
   noteDuration: 300,
   midiData: {
     Note: 70,
@@ -67,11 +67,11 @@ export async function setupGui (cameras, mobile) {
   // Get available chords
   const achords = Object.keys(chords)
   if (achords.length > 0) {
-    guiState.chordScale = achords[0]
+    guiState.chordIntervals = achords[0]
   }
 
   // Selector for values to use for the MIDI notes
-  gui.add(guiState, 'chordScale', ['default'].concat(achords))
+  gui.add(guiState, 'chordIntervals', ['default'].concat(achords))
 
   // Selector for the duration (in milliseconds) for how long a note is ON
   gui.add(guiState, 'noteDuration', 100, 2000, 50)

@@ -2,9 +2,9 @@
 
 import { loadVideo } from './camera-util.js'
 import { sendMidiNote, getMidiDevices, computeNote, computeVelocity } from './midi-connect.js'
-import { drawKeypoints, drawSkeleton, drawBoundingBox, drawBox } from './canvas-util.js'
+import { drawKeypoints, drawSkeleton, drawBoundingBox, drawBox } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
-import { chords } from './chords.js'
+import { chords } from './chord-intervals.js'
 
 const VIDEOWIDTH = 800
 const VIDEOHEIGHT = 600
@@ -173,8 +173,8 @@ const convertToMIDI = function (leftWrist, rightWrist) {
     // horizontal scale (right zone): low-to-high => verticalSplit-to-rightEdge
 
     let chordsArray = []
-    if (guiState.chordScale !== 'default' && chords.hasOwnProperty(guiState.chordScale)) {
-      chordsArray = chords[guiState.chordScale]
+    if (guiState.chordIntervals !== 'default' && chords.hasOwnProperty(guiState.chordIntervals)) {
+      chordsArray = chords[guiState.chordIntervals]
     }
 
     const leftHorVelo = computeVelocity(leftZone.x, verticalSplit, leftEdge)
