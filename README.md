@@ -1,12 +1,12 @@
 # Veremin
 
-Veremin is a video theremin. It is the brainchild of [John Cohn](https://github.com/johncohn) and based on [PoseNet](https://github.com/tensorflow/tfjs-models/tree/master/posenet) TensorFlow.js model.
+Veremin is a video theremin based on [PoseNet](https://github.com/tensorflow/tfjs-models/tree/master/posenet) and the brainchild of [John Cohn](https://github.com/johncohn).
 
-It takes the PoseNet [Camera Demo](https://github.com/tensorflow/tfjs-models/tree/master/posenet/demos#demo-1-camera) and modifies it to allow you to make music by moving your hands/arms in front of a web camera.
+It builds upon the PoseNet [Camera Demo](https://github.com/tensorflow/tfjs-models/tree/master/posenet/demos#demo-1-camera) and modifies it to allow you to make music by moving your hands/arms in front of a web camera.
 
-PoseNet is used to predict the location of your wrists within the video. The app takes the prediction and converts them to raw MIDI values which get sent to a connected MIDI device.
+PoseNet is used to predict the location of your wrists within the video. The app takes the prediction and converts them to MIDI values which get sent to a connected MIDI device.
 
-The app is currently a **work in progress** and only supports the Chrome browser (version 43 or later).
+The app is currently a **work in progress** and at this time only supports the Chrome browser (version 43 or later).
 
 
 ## Featured technologies
@@ -98,13 +98,13 @@ To run the app locally:
 
 Before using the app, connect a MIDI synthesizer to your computer. If you do not have a MIDI synthesizer you can download and run a software synthesizer such as [SimpleSynth](http://notahat.com/simplesynth/). If no (hardware or software) synthesizer is detected the app defaults to using the Web Audio API to generate tones from the browser.
 
-You will need to view the app with Chrome and accept the prompt to allow access the web camera. Once allowed, the PoseNet model gets loaded (it may take a few seconds).
+You will need to view the app with Chrome and accept the prompt to allow access the web camera. Once access is allowed, the PoseNet model gets loaded (it may take a few seconds).
 
-After the model is loaded, the video will load and include an overlay with skeleton and joints information detected by PoseNet. The overlay also include two adjacent boxes. When your wrists are detected within each of the boxes, you should here some tones.
+After the model is loaded, the video will load and include an overlay with skeletal and joint information detected by PoseNet. The overlay also include two adjacent zones/boxes. When your wrists are detected within each of the zones, you should here some sound.
 
-You can move your right hand/arm up and down to generate different notes to send to the connected MIDI device. You can move your left hand/arm left and right to adjust the velocity of the note.
+You can move your right hand/arm up and down (in the right zone) to generate different notes to send to the connected MIDI device. You can move your left hand/arm left and right (in the left zone) to adjust the velocity of the note.
 
-Click on **Open Controls** to open the control panel. In the control panel you are able to change MIDI device (if more than one is connected), view the raw MIDI values being sent, configurable PoseNet settings, and set additional optionals for the video.
+Click on **Open Controls** to open the control panel. In the control panel you are able to change MIDI devices (if more than one is connected), view the MIDI values being sent, configure PoseNet settings, and set additional optionals for the video.
 
 ## Links
 

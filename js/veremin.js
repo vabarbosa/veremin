@@ -1,262 +1,81 @@
+/* global posenet, requestAnimationFrame */
 
-import {drawKeypoints, drawSkeleton, drawBoundingBox, drawBox, drawPoint} from './demo_util.js'
-import {setPreferredDevice, sendMidiNote, getMidiDevices, computeNote} from './midi-connect.js'
+import { loadVideo } from './camera-util.js'
+import { sendMidiNote, getMidiDevices, computeNote, computeVelocity } from './midi-connect.js'
+import { drawKeypoints, drawSkeleton, drawBoundingBox, drawBox } from './canvas-util.js'
+import { guiState, setupGui } from './control-panel.js'
+import { chords } from './chords.js'
 
-const videoWidth = 800;
-const videoHeight = 600;
+const VIDEOWIDTH = 800
+const VIDEOHEIGHT = 600
 
 const LEFTWRIST = 9
 const RIGHTWRIST = 10
-const qWidth = videoWidth * 0.5
-const qHeight = videoHeight * 0.667
+const ZONEWIDTH = VIDEOWIDTH * 0.5
+const ZONEHEIGHT = VIDEOHEIGHT * 0.667
 
-function isAndroid() {
-  return /Android/i.test(navigator.userAgent);
+let posenetModel = null
+
+const isMobile = function () {
+  const isAndroid = /Android/i.test(navigator.userAgent)
+  const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+  return isAndroid || isiOS
 }
 
-function isiOS() {
-  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-function isMobile() {
-  return isAndroid() || isiOS();
-}
-
-
-/**
- * Loads a the camera to be used in the demo
- */
-async function setupCamera() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    throw new Error('Browser API navigator.mediaDevices.getUserMedia not available');
-  }
-
-  const video = document.getElementById('video');
-  video.width = videoWidth;
-  video.height = videoHeight;
-
-  const mobile = isMobile();
-  const stream = await navigator.mediaDevices.getUserMedia({
-    'audio': false,
-    'video': {
-      facingMode: 'user',
-      width: mobile ? undefined : videoWidth,
-      height: mobile ? undefined : videoHeight
-    },
-  });
-
-  video.srcObject = stream;
-
-  return new Promise((resolve) => {
-    video.onloadedmetadata = () => {
-      resolve(video);
-    };
-  });
-}
-
-async function loadVideo() {
-  const video = await setupCamera();
-  video.play();
-
-  return video;
-}
-
-let guiState = {
-  algorithm: 'multi-pose',
-  midiDevice: 'browser',
-  noteDuration: 300,
-  midiMessage: {
-    leftNote: 70,
-    leftVelocity: 75,
-    rightNote: 70,
-    rightVelocity: 75
-  },
-  input: {
-    mobileNetArchitecture: isMobile() ? '0.50' : '0.75',
-    outputStride: 16,
-    imageScaleFactor: 0.5,
-  },
-  singlePoseDetection: {
-    minPoseConfidence: 0.1,
-    minPartConfidence: 0.5,
-  },
-  multiPoseDetection: {
-    maxPoseDetections: 5,
-    minPoseConfidence: 0.15,
-    minPartConfidence: 0.1,
-    nmsRadius: 30.0,
-  },
-  output: {
-    showVideo: true,
-    showSkeleton: true,
-    showPoints: true,
-    showBoundingBox: false,
-    showNoteBox: true
-  },
-  net: null,
+const setUserMedia = function () {
+  navigator.getUserMedia = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia
 }
 
 /**
- * Sets up dat.gui controller on the top-right of the window
+ * Feeds an image to posenet to estimate poses - this is where the magic happens.
+ * This function loops with a requestAnimationFrame method.
  */
-async function setupGui(cameras, net) {
-  guiState.net = net;
+const detectPoseInRealTime = function (video) {
+  const canvas = document.getElementById('output')
+  const canvasCtx = canvas.getContext('2d')
+  const flipHorizontal = true // since images are being fed from a webcam
 
-  if (cameras.length > 0) {
-    guiState.camera = cameras[0].deviceId;
-  }
+  canvas.width = VIDEOWIDTH
+  canvas.height = VIDEOHEIGHT
 
-  const gui = new dat.GUI({width: 300});
-
-  // The single-pose algorithm is faster and simpler but requires only one
-  // person to be in the frame or results will be innaccurate. Multi-pose works
-  // for more than 1 person
-  const algorithmController = gui.add(guiState, 'algorithm', ['multi-pose', 'single-pose' ]);
-
-  const mOutputs = await getMidiDevices()
-  let mouts = Object.keys(mOutputs)
-  if (mouts.length > 0) {
-    guiState.midiDevice = mouts[0]
-    setPreferredDevice(mouts[0])
-  }
-
-  const midiDeviceController = gui.add(guiState, 'midiDevice', ['browser'].concat(mouts))
-  const noteDurationController = gui.add(guiState, 'noteDuration', 100, 2000, 50)
-
-  let msgMidi = gui.addFolder("MIDI Message")
-  msgMidi.add(guiState.midiMessage, 'leftNote', 0, 127).listen()
-  msgMidi.add(guiState.midiMessage, 'rightNote', 0, 127).listen()
-  msgMidi.add(guiState.midiMessage, 'leftVelocity', 0, 127).listen()
-  msgMidi.add(guiState.midiMessage, 'rightVelocity', 0, 127).listen()
-  msgMidi.open()
-
-  // The input parameters have the most effect on accuracy and speed of the
-  // network
-  let input = gui.addFolder('Input');
-  // Architecture: there are a few PoseNet models varying in size and
-  // accuracy. 1.01 is the largest, but will be the slowest. 0.50 is the
-  // fastest, but least accurate.
-  const architectureController = input.add(
-    guiState.input,
-    'mobileNetArchitecture',
-    ['1.01', '1.00', '0.75', '0.50']
-  );
-  // Output stride:  Internally, this parameter affects the height and width of
-  // the layers in the neural network. The lower the value of the output stride
-  // the higher the accuracy but slower the speed, the higher the value the
-  // faster the speed but lower the accuracy.
-  input.add(guiState.input, 'outputStride', [8, 16, 32]);
-  // Image scale factor: What to scale the image by before feeding it through
-  // the network.
-  input.add(guiState.input, 'imageScaleFactor').min(0.2).max(1.0);
-  // input.open();
-
-  // Pose confidence: the overall confidence in the estimation of a person's
-  // pose (i.e. a person detected in a frame)
-  // Min part confidence: the confidence that a particular estimated keypoint
-  // position is accurate (i.e. the elbow's position)
-  let single = gui.addFolder('Single Pose Detection');
-  single.add(guiState.singlePoseDetection, 'minPoseConfidence', 0.0, 1.0);
-  single.add(guiState.singlePoseDetection, 'minPartConfidence', 0.0, 1.0);
-
-  let multi = gui.addFolder('Multi Pose Detection');
-  multi
-    .add(guiState.multiPoseDetection, 'maxPoseDetections')
-    .min(1)
-    .max(20)
-    .step(1);
-  multi.add(guiState.multiPoseDetection, 'minPoseConfidence', 0.0, 1.0);
-  multi.add(guiState.multiPoseDetection, 'minPartConfidence', 0.0, 1.0);
-  // nms Radius: controls the minimum distance between poses that are returned
-  // defaults to 20, which is probably fine for most use cases
-  multi
-    .add(guiState.multiPoseDetection, 'nmsRadius')
-    .min(0.0)
-    .max(40.0);
-  multi.open();
-
-  let output = gui.addFolder('Output');
-  output.add(guiState.output, 'showVideo');
-  output.add(guiState.output, 'showSkeleton');
-  output.add(guiState.output, 'showPoints');
-  output.add(guiState.output, 'showBoundingBox');
-  output.add(guiState.output, 'showNoteBox');
-  // output.open();
-
-  architectureController.onChange(function(architecture) {
-    guiState.changeToArchitecture = architecture;
-  });
-
-  algorithmController.onChange(function(value) {
-    switch (guiState.algorithm) {
-      case 'single-pose':
-        multi.close();
-        single.open();
-        break;
-      case 'multi-pose':
-        single.close();
-        multi.open();
-        break;
-    }
-  });
-
-  midiDeviceController.onChange(function (value) {
-    setPreferredDevice(guiState.midiDevice)
-  })
-
-  gui.close()
-}
-
-
-/**
- * Feeds an image to posenet to estimate poses - this is where the magic
- * happens. This function loops with a requestAnimationFrame method.
- */
-function detectPoseInRealTime(video, net) {
-  const canvas = document.getElementById('output');
-  const ctx = canvas.getContext('2d');
-  // since images are being fed from a webcam
-  const flipHorizontal = true;
-
-  canvas.width = videoWidth;
-  canvas.height = videoHeight;
-
-  async function poseDetectionFrame() {
+  async function poseDetectionFrame () {
     if (guiState.changeToArchitecture) {
       // Important to purge variables and free up GPU memory
-      guiState.net.dispose();
+      posenetModel.dispose()
 
-      // Load the PoseNet model weights for either the 0.50, 0.75, 1.00, or 1.01
-      // version
-      guiState.net = await posenet.load(+guiState.changeToArchitecture);
+      // Load the PoseNet model weights for either the 0.50, 0.75, 1.00, or 1.01 version
+      posenetModel = await posenet.load(+guiState.changeToArchitecture)
 
-      guiState.changeToArchitecture = null;
+      guiState.changeToArchitecture = null
     }
 
-    // Scale an image down to a certain factor. Too large of an image will slow
-    // down the GPU
-    const imageScaleFactor = guiState.input.imageScaleFactor;
-    const outputStride = +guiState.input.outputStride;
+    // Scale an image down to a certain factor.
+    // Too large of an image will slow down the GPU
+    const imageScaleFactor = guiState.input.imageScaleFactor
+    const outputStride = +guiState.input.outputStride
 
-    let poses = [];
-    let minPoseConfidence;
-    let minPartConfidence;
+    let poses = []
+    let minPoseConfidence
+    let minPartConfidence
 
     switch (guiState.algorithm) {
       case 'single-pose':
-        const pose = await guiState.net.estimateSinglePose(
+        const pose = await posenetModel.estimateSinglePose(
           video,
           imageScaleFactor,
           flipHorizontal,
           outputStride
-        );
-        poses.push(pose);
+        )
+        poses.push(pose)
 
-        minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence;
-        minPartConfidence = +guiState.singlePoseDetection.minPartConfidence;
-        break;
+        minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence
+        minPartConfidence = +guiState.singlePoseDetection.minPartConfidence
+        break
       case 'multi-pose':
-        poses = await guiState.net.estimateMultiplePoses(
+        poses = await posenetModel.estimateMultiplePoses(
           video,
           imageScaleFactor,
           flipHorizontal,
@@ -264,126 +83,147 @@ function detectPoseInRealTime(video, net) {
           guiState.multiPoseDetection.maxPoseDetections,
           guiState.multiPoseDetection.minPartConfidence,
           guiState.multiPoseDetection.nmsRadius
-        );
+        )
 
-        minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence;
-        minPartConfidence = +guiState.multiPoseDetection.minPartConfidence;
-        break;
+        minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence
+        minPartConfidence = +guiState.multiPoseDetection.minPartConfidence
+        break
     }
 
-    ctx.clearRect(0, 0, videoWidth, videoHeight);
+    canvasCtx.clearRect(0, 0, VIDEOWIDTH, VIDEOHEIGHT)
 
     if (guiState.output.showVideo) {
-      ctx.save();
-      ctx.scale(-1, 1);
-      ctx.translate(-videoWidth, 0);
-      ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
-      ctx.restore();
+      canvasCtx.save()
+      canvasCtx.scale(-1, 1)
+      canvasCtx.translate(-VIDEOWIDTH, 0)
+      canvasCtx.drawImage(video, 0, 0, VIDEOWIDTH, VIDEOHEIGHT)
+      canvasCtx.restore()
     }
 
-    if (guiState.output.showNoteBox) {
-      drawBox(qWidth, 10 , videoWidth-10, qHeight , ctx );
-      drawBox(10, 10 , qWidth, qHeight , ctx );
+    if (guiState.output.showZones) {
+      drawBox(ZONEWIDTH, 10, VIDEOWIDTH - 10, ZONEHEIGHT, canvasCtx)
+      drawBox(10, 10, ZONEWIDTH, ZONEHEIGHT, canvasCtx)
     }
 
-    // For each pose (i.e. person) detected in an image, loop through the poses
-    // and draw the resulting skeleton and keypoints if over certain confidence
-    // scores
- 
-    poses.forEach(({score, keypoints}) => {
+    // For each pose (i.e. person) detected in an image, loop through the poses and
+    // draw the resulting skeleton and keypoints if over certain confidence scores
+    poses.forEach(({ score, keypoints }) => {
       if (score >= minPoseConfidence) {
         const leftWrist = keypoints[LEFTWRIST]
         const rightWrist = keypoints[RIGHTWRIST]
 
-        if (leftWrist.score > minPartConfidence
-            && leftWrist.position.x >= qWidth
-            && leftWrist.position.y <= qHeight) {
+        if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
+          // Convert keypoints to MIDI data
+          const mididata = convertToMIDI(leftWrist, rightWrist)
 
-          if (rightWrist.score >  minPartConfidence
-              && rightWrist.position.x <= qWidth
-              && rightWrist.position.y <= qHeight) {
+          // TODO: figure out which option (A or B) below is best
 
-            let ynote1 = 127 - computeNote(rightWrist.position.y, 0, qHeight)     // NOTE-     left wrist  (low-to-high) bottom-to-top
-            let ynote2 = 127 - computeNote(leftWrist.position.y, 0, qHeight)      // NOTE-     right wrist (low-to-high) bottom-to-top
-            let xvelo1 = 127 - Math.round(127 * rightWrist.position.x/qWidth)     // VELOCITY- left wrist  (low-to-high) right-to-left
-            let xvelo2 = Math.round(127 * leftWrist.position.x/qWidth) - 127      // VELOCITY- right wrist (low-to-high) left-to-right
+          // A. send multiple MIDI notes
+          mididata.forEach(data => {
+            if (data && data.length === 2) {
+              sendMidiNote(data[0], data[1], guiState.noteDuration)
+            }
+          })
 
-            let xnote1 = 127 - computeNote(rightWrist.position.x, 0, qWidth)      // NOTE-     left wrist  (low-to-high) right-to-left
-            let xnote2 = computeNote((leftWrist.position.x - qWidth), 0, qWidth)  // NOTE-     right wrist (low-to-high) left-to-right
-            let yvelo1 = 127 - Math.round(127 * rightWrist.position.y/qHeight)    // VELOCITY- left wrist  (low-to-high) bottom-to-top
-            let yvelo2 = 127 - Math.round(127 * leftWrist.position.y/qHeight)     // VELOCITY- right wrist (low-to-high) bottom-to-top
-
-            // console.log(`ynote1=${ynote1}, ynote2=${ynote2}, xvelo1=${xvelo1}, xvelo2=${xvelo2}`)
-            // console.log(`xnote1=${xnote1}, xnote2=${xnote2}, yvelo1=${yvelo1}, yvelo2=${yvelo2}`)
-
-            guiState.midiMessage.leftNote = xnote1
-            guiState.midiMessage.leftVelocity = yvelo1
-            guiState.midiMessage.rightNote = xnote2
-            guiState.midiMessage.rightVelocity = yvelo2
-
-            sendMidiNote(ynote2, xvelo1, guiState.noteDuration)
-            // sendMidiNote(xnote2, yvelo2, guiState.noteDuration)
-          }
+          // B. send only a single MIDI note
+          // const mdata = mididata && mididata.length ? mididata[0] : []
+          // if (mdata && mdata.length === 2) {
+          //   sendMidiNote(mdata[0], mdata[1], guiState.noteDuration)
+          // }
         }
-      
+
         if (guiState.output.showPoints) {
-          drawKeypoints(keypoints, minPartConfidence, ctx);
+          drawKeypoints(keypoints, minPartConfidence, canvasCtx)
         }
         if (guiState.output.showSkeleton) {
-          drawSkeleton(keypoints, minPartConfidence, ctx);
+          drawSkeleton(keypoints, minPartConfidence, canvasCtx)
         }
         if (guiState.output.showBoundingBox) {
-          drawBoundingBox(keypoints, ctx);
+          drawBoundingBox(keypoints, canvasCtx)
         }
       }
-    });
+    })
 
-    requestAnimationFrame(poseDetectionFrame);
+    requestAnimationFrame(poseDetectionFrame)
   }
 
-  poseDetectionFrame();
+  poseDetectionFrame()
+}
+
+/**
+ * Convert wrist positions to MIDI note and velocity.
+ * Returns an array with note and velocity values (i.e., [note, velocity])
+ *
+ * @param {Object} leftWrist - posenet 'leftWrist' keypoints (corresponds to user's right hand)
+ * @param {Object} rightWrist - posenet 'rightWrist' keypoints (corresponds to user's left hand)
+ */
+const convertToMIDI = function (leftWrist, rightWrist) {
+  const leftZone = rightWrist.position
+  const rightZone = leftWrist.position
+  let midiData = []
+
+  if (rightZone.x >= ZONEWIDTH &&
+      rightZone.y <= ZONEHEIGHT &&
+      leftZone.x <= ZONEWIDTH &&
+      leftZone.y <= ZONEHEIGHT) {
+    // vertical (both zones):   low-to-high => bottom-to-top => ZONEHEIGHT-to-0
+    // horizontal (left zone):  low-to-high => right-to-left => ZONEWIDTH-to-0
+    // horizontal (right zone): low-to-high => left-to-right => ZONEWIDTH-to-VIDEOWIDTH
+
+    let chordsArray = []
+    if (guiState.chordScale !== 'default' && chords.hasOwnProperty(guiState.chordScale)) {
+      chordsArray = chords[guiState.chordScale]
+    }
+
+    const leftHorVelo = computeVelocity(leftZone.x, ZONEWIDTH, 0)
+    // const rightHorVelo = computeVelocity(rightZone.x, ZONEWIDTH, VIDEOWIDTH)
+    // const leftVertNote = computeNote(leftZone.y, ZONEHEIGHT, 0, chordsArray)
+    const rightVertNote = computeNote(rightZone.y, ZONEHEIGHT, 0, chordsArray)
+
+    // console.log(`${leftHorVelo}=leftHorVelo, ${rightVertNote}=rightVertNote`)
+
+    guiState.midiData.Velocity = leftHorVelo
+    guiState.midiData.Note = rightVertNote[0]
+
+    rightVertNote.forEach(note => {
+      midiData.push([ note, leftHorVelo ])
+    })
+  }
+
+  return midiData
 }
 
 /**
  * Kicks off the demo by loading the posenet model, finding and loading
  * available camera devices, and setting off the detectPoseInRealTime function.
  */
-async function bindPage() {
-  // Load the PoseNet model weights with architecture 0.75
-  const net = await posenet.load(0.75);
+const bindPage = async function () {
+  posenetModel = await posenet.load(0.75) // load the PoseNet with architecture 0.75
 
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('main').style.display = 'block';
+  document.getElementById('loading').style.display = 'none'
+  document.getElementById('main').style.display = 'block'
 
-  let video;
+  const mobile = isMobile()
+  let video
 
   try {
-    video = await loadVideo();
+    video = await loadVideo('video', VIDEOWIDTH, VIDEOHEIGHT, mobile)
   } catch (e) {
-    let info = document.getElementById('info');
-    info.textContent = 'this browser does not support video capture,' +
-        'or this device does not have a camera';
-    info.style.display = 'block';
-    throw e;
+    let info = document.getElementById('info')
+    info.textContent = 'Browser does not support video capture or this device does not have a camera'
+    info.style.display = 'block'
+    throw e
   }
 
-  setupGui([], net);
-
-  detectPoseInRealTime(video, net);
+  await setupGui([], mobile)
+  detectPoseInRealTime(video)
 }
 
-function setUserMedia() {
-  navigator.getUserMedia = navigator.getUserMedia
-    || navigator.webkitGetUserMedia
-    || navigator.mozGetUserMedia;
-}
-
+// run the app
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function () {
-    // setTimeout(function () {
-      setUserMedia()
-      getMidiDevices().then(bindPage)
-    // }, 500)
+    setUserMedia()
+    getMidiDevices().then(bindPage)
   })
 } else {
   setTimeout(function () {
