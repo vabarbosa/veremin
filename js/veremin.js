@@ -116,20 +116,12 @@ const detectPoseInRealTime = function (video) {
           // Convert keypoints to MIDI data
           const mididata = convertToMIDI(leftWrist, rightWrist)
 
-          // TODO: figure out which option (A or B) below is best
-
-          // A. send multiple MIDI notes
+          // send MIDI data
           mididata.forEach(data => {
             if (data && data.length === 2) {
               sendMidiNote(data[0], data[1], guiState.noteDuration)
             }
           })
-
-          // B. send only a single MIDI note
-          // const mdata = mididata && mididata.length ? mididata[0] : []
-          // if (mdata && mdata.length === 2) {
-          //   sendMidiNote(mdata[0], mdata[1], guiState.noteDuration)
-          // }
         }
 
         if (guiState.output.showPoints) {
