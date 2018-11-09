@@ -1,0 +1,7 @@
+---
+applications:
+- buildpack: https://github.com/cloudfoundry/staticfile-buildpack.git
+  name: video theremin
+  random-route: true
+  memory: 64M
+  stack: cflinuxfs2
