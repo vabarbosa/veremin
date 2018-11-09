@@ -7,7 +7,7 @@ import { chords } from './chords.js'
  *  Defines control panel settings and default values
  * */
 export let guiState = {
-  algorithm: 'single-pose',
+  algorithm: 'multi-pose',
   midiDevice: 'browser',
   chordScale: 'default',
   noteDuration: 300,
