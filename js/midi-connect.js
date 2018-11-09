@@ -80,7 +80,7 @@ export function setPreferredDevice (name) {
  */
 export function sendMidiNote (note, velocity, duration = 300) {
   if (note && velocity) {
-    console.log(`NOTEON('${note}, ${velocity}')`)
+    // console.log(`NOTEON('${note}, ${velocity}')`)
 
     if (selectedMidiDevice) {
       selectedMidiDevice.send([NOTEON, note, velocity])
