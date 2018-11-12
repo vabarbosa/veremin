@@ -201,7 +201,7 @@ export function playNote (value, volume, duration = 300, chordsInterval) {
       let v = computeVelocity(volume, 0, 1, chordsArray)
 
       midiNotes.forEach(n => {
-        console.log(`n=${n}, v=${v}`)
+        // console.log(`n=${n}, v=${v}`)
         playUsingMidiDevice(n, v, duration, chordsArray)
       })
     } else if (tonejsInstrument) {
