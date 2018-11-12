@@ -1,10 +1,9 @@
 /* global posenet, requestAnimationFrame */
 
 import { loadVideo } from './camera-util.js'
-import { sendMidiNote, getMidiDevices, computeNote, computeVelocity } from './midi-connect.js'
+import { playNote, getMidiDevices } from './audio-controller.js'
 import { drawKeypoints, drawSkeleton, drawBoundingBox, drawBox } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
-import { chords } from './chord-intervals.js'
 
 const VIDEOWIDTH = 800
 const VIDEOHEIGHT = 600
@@ -12,7 +11,7 @@ const VIDEOHEIGHT = 600
 const LEFTWRIST = 9
 const RIGHTWRIST = 10
 const ZONEWIDTH = VIDEOWIDTH * 0.5
-const ZONEHEIGHT = VIDEOHEIGHT * 0.667
+const ZONEHEIGHT = VIDEOHEIGHT * 0.7
 const ZONEOFFSET = 10
 
 let posenetModel = null
@@ -93,7 +92,7 @@ const detectPoseInRealTime = function (video) {
 
     canvasCtx.clearRect(0, 0, VIDEOWIDTH, VIDEOHEIGHT)
 
-    if (guiState.output.showVideo) {
+    if (guiState.canvas.showVideo) {
       canvasCtx.save()
       canvasCtx.scale(-1, 1)
       canvasCtx.translate(-VIDEOWIDTH, 0)
@@ -101,7 +100,7 @@ const detectPoseInRealTime = function (video) {
       canvasCtx.restore()
     }
 
-    if (guiState.output.showZones) {
+    if (guiState.canvas.showZones) {
       // draw left zone
       drawBox(ZONEOFFSET, ZONEOFFSET, ZONEWIDTH, ZONEHEIGHT, canvasCtx)
       // draw right zone
@@ -110,30 +109,37 @@ const detectPoseInRealTime = function (video) {
 
     // For each pose (i.e. person) detected in an image, loop through the poses and
     // draw the resulting skeleton and keypoints if over certain confidence scores
+    // and send data to play corresponding note
     poses.forEach(({ score, keypoints }) => {
       if (score >= minPoseConfidence) {
         const leftWrist = keypoints[LEFTWRIST]
         const rightWrist = keypoints[RIGHTWRIST]
 
         if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
-          // Convert keypoints to MIDI data
-          const mididata = convertToMIDI(leftWrist, rightWrist)
+          // Normalize keypoints to values between 0 and 1 (horizontally & vertically)
+          const position = normalizePositions(leftWrist, rightWrist)
 
-          // send MIDI data
-          mididata.forEach(data => {
-            if (data && data.length === 2) {
-              sendMidiNote(data[0], data[1], guiState.noteDuration)
-            }
-          })
+          if (position.right.vertical > 0 && position.left.horizontal > 0) {
+            playNote(
+              position.right.vertical, // note
+              position.left.horizontal, // volume
+              guiState.noteDuration,
+              guiState.midiDevice.chordIntervals === 'default' ? null : guiState.midiDevice.chordIntervals
+            )
+          } else {
+            playNote(0, 0)
+          }
+        } else {
+          playNote(0, 0)
         }
 
-        if (guiState.output.showPoints) {
+        if (guiState.canvas.showPoints) {
           drawKeypoints(keypoints, minPartConfidence, canvasCtx)
         }
-        if (guiState.output.showSkeleton) {
+        if (guiState.canvas.showSkeleton) {
           drawSkeleton(keypoints, minPartConfidence, canvasCtx)
         }
-        if (guiState.output.showBoundingBox) {
+        if (guiState.canvas.showBoundingBox) {
           drawBoundingBox(keypoints, canvasCtx)
         }
       }
@@ -146,13 +152,12 @@ const detectPoseInRealTime = function (video) {
 }
 
 /**
- * Convert wrist positions to MIDI note and velocity.
- * Returns an array with note and velocity values (i.e., [note, velocity])
+ * Returns an object the horizontal and vertical positions of left and right wrist normalized between 0 and 1
  *
  * @param {Object} leftWrist - posenet 'leftWrist' keypoints (corresponds to user's right hand)
  * @param {Object} rightWrist - posenet 'rightWrist' keypoints (corresponds to user's left hand)
  */
-const convertToMIDI = function (leftWrist, rightWrist) {
+const normalizePositions = function (leftWrist, rightWrist) {
   const leftZone = rightWrist.position
   const rightZone = leftWrist.position
 
@@ -162,37 +167,46 @@ const convertToMIDI = function (leftWrist, rightWrist) {
   const topEdge = ZONEOFFSET
   const bottomEdge = ZONEHEIGHT
 
-  let midiData = []
-
-  if (rightZone.x >= verticalSplit && rightZone.x <= rightEdge &&
-      rightZone.y <= bottomEdge && rightZone.y >= topEdge &&
-      leftZone.x >= leftEdge && leftZone.x <= verticalSplit &&
-      leftZone.y <= bottomEdge && leftZone.y >= topEdge) {
-    // vertical scale (both zones):   low-to-high => bottomEdge-to-topEdge
-    // horizontal scale (left zone):  low-to-high => verticalSplit-to-leftEdge
-    // horizontal scale (right zone): low-to-high => verticalSplit-to-rightEdge
-
-    let chordsArray = []
-    if (guiState.chordIntervals !== 'default' && chords.hasOwnProperty(guiState.chordIntervals)) {
-      chordsArray = chords[guiState.chordIntervals]
+  let position = {
+    right: {
+      vertical: 0,
+      horizontal: 0
+    },
+    left: {
+      vertical: 0,
+      horizontal: 0
     }
-
-    const leftHorVelo = computeVelocity(leftZone.x, verticalSplit, leftEdge)
-    // const rightHorVelo = computeVelocity(rightZone.x, verticalSplit, rightEdge)
-    // const leftVertNote = computeNote(leftZone.y, bottomEdge, topEdge, chordsArray)
-    const rightVertNote = computeNote(rightZone.y, bottomEdge, topEdge, chordsArray)
-
-    // console.log(`${leftHorVelo}=leftHorVelo, ${rightVertNote}=rightVertNote`)
-
-    guiState.midiData.Velocity = leftHorVelo
-    guiState.midiData.Note = rightVertNote[0]
-
-    rightVertNote.forEach(note => {
-      midiData.push([ note, leftHorVelo ])
-    })
   }
 
-  return midiData
+  if (rightZone.x >= verticalSplit && rightZone.x <= rightEdge) {
+    position.right.horizontal = computePercentage(rightZone.x, verticalSplit, rightEdge)
+  }
+  if (rightZone.y <= bottomEdge && rightZone.y >= topEdge) {
+    position.right.vertical = computePercentage(rightZone.y, bottomEdge, topEdge)
+  }
+  if (leftZone.x >= leftEdge && leftZone.x <= verticalSplit) {
+    position.left.horizontal = computePercentage(leftZone.x, verticalSplit, leftEdge)
+  }
+  if (leftZone.y <= bottomEdge && leftZone.y >= topEdge) {
+    position.left.vertical = computePercentage(leftZone.y, bottomEdge, topEdge)
+  }
+
+  return position
+}
+
+/**
+ * Compute percentage of the provided value in the given range
+ *
+ * @param {Number} value - a number between 'low' and 'high' to compute percentage
+ * @param {Number} low - corresponds to a number that should produce value 0
+ * @param {Number} high - corresponds to a number that should produce value 1
+ */
+const computePercentage = function (value, low, high) {
+  const dist = isNaN(value) ? 0 : value
+  const minDist = isNaN(low) ? 0 : low
+  const maxDist = isNaN(high) ? dist + 1 : high
+
+  return (dist - minDist) / (maxDist - minDist)
 }
 
 /**

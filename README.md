@@ -4,17 +4,18 @@ Veremin is a video theremin based on [PoseNet](https://github.com/tensorflow/tfj
 
 It builds upon the PoseNet [Camera Demo](https://github.com/tensorflow/tfjs-models/tree/master/posenet/demos#demo-1-camera) and modifies it to allow you to make music by moving your hands/arms in front of a web camera.
 
-PoseNet is used to predict the location of your wrists within the video. The app takes the prediction and converts them to MIDI values which get sent to a connected MIDI device.
+PoseNet is used to predict the location of your wrists within the video. The app takes the predictions and converts them to MIDI values which get sent to a connected MIDI device.
 
-The app is currently a **work in progress** and at this time only supports the Chrome browser (version 43 or later).
+This is currently a **work in progress** and at this time only supports the Chrome browser (version 43 or later).
 
 
-## Featured technologies
+## Featured tools & technologies
 
 - [PoseNet](https://github.com/tensorflow/tfjs-models/tree/master/posenet) - a machine learning model which allows for real-time human pose estimation in the browser
 - [TensorFlow.js](https://js.tensorflow.org) - a JavaScript library for training and deploying ML models in the browser and on Node.js
 - [Web MIDI API](https://www.w3.org/TR/webmidi) - an API supporting the MIDI protocol, enabling web applications to enumerate and select MIDI input and output devices on the client system and send and receive MIDI messages
 - [Web Audio API](https://www.w3.org/TR/webaudio) - a high-level Web API for processing and synthesizing audio in web applications
+- [Tone.js](https://tonejs.github.io/) - a framework for creating interactive music in the browser
 
 
 ## Live demo
@@ -113,5 +114,4 @@ Click on **Open Controls** to open the control panel. In the control panel you a
  - [Prepare the app for deployment - IBM Cloud](https://console.bluemix.net/docs/runtimes/nodejs/getting-started.html#prepare)
  - [Real-time Human Pose Estimation in the Browser with TensorFlow.js](https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5)
  - [Playing with MIDI in JavaScript](https://medium.com/swinginc/playing-with-midi-in-javascript-b6999f2913c3)
-
-
+ - [Introduction to Web Audio API](https://css-tricks.com/introduction-web-audio-api)

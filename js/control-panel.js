@@ -1,6 +1,6 @@
 /* global dat */
 
-import { getMidiDevices, setPreferredDevice } from './midi-connect.js'
+import { getMidiDevices, setPreferredDevice, getBrowserPresets, setPreferredPreset } from './audio-controller.js'
 import { chords } from './chord-intervals.js'
 
 /**
@@ -8,13 +8,14 @@ import { chords } from './chord-intervals.js'
  * */
 export let guiState = {
   algorithm: 'multi-pose',
-  midiDevice: 'browser',
-  chordIntervals: 'default',
-  noteDuration: 300,
-  midiData: {
-    Note: 70,
-    Velocity: 75
+  outputDevice: 'browser',
+  midiDevice: {
+    chordIntervals: 'default'
   },
+  browser: {
+    preset: 'default'
+  },
+  noteDuration: 300,
   input: {
     mobileNetArchitecture: '0.75',
     outputStride: 16,
@@ -30,7 +31,7 @@ export let guiState = {
     minPartConfidence: 0.1,
     nmsRadius: 30.0
   },
-  output: {
+  canvas: {
     showVideo: true,
     showSkeleton: true,
     showPoints: true,
@@ -57,30 +58,38 @@ export async function setupGui (cameras, mobile) {
   const midiDevices = await getMidiDevices()
   const mouts = Object.keys(midiDevices)
   if (mouts.length > 0) {
-    guiState.midiDevice = mouts[0]
+    guiState.outputDevice = mouts[0]
     setPreferredDevice(mouts[0])
   }
 
   // Selector for MIDI device (with additional option for Browser Audio API)
-  const midiDeviceController = gui.add(guiState, 'midiDevice', ['browser'].concat(mouts))
+  const outputDeviceController = gui.add(guiState, 'outputDevice', ['browser'].concat(mouts))
+
+  const browserPreset = gui.addFolder('Browser')
+
+  // Get available browser presets
+  const binst = getBrowserPresets()
+  if (binst.length > 0) {
+    guiState.browser.preset = binst[0]
+    setPreferredPreset(binst[0])
+  }
+
+  // Selector for Tone.js presets to use in the browser
+  const browserPresetController = browserPreset.add(guiState.browser, 'preset', ['default'].concat(binst))
+
+  const midiDevice = gui.addFolder('MIDI Device')
 
   // Get available chords
   const achords = Object.keys(chords)
   if (achords.length > 0) {
-    guiState.chordIntervals = achords[0]
+    guiState.midiDevice.chordIntervals = achords[0]
   }
 
   // Selector for values to use for the MIDI notes
-  gui.add(guiState, 'chordIntervals', ['default'].concat(achords))
+  midiDevice.add(guiState.midiDevice, 'chordIntervals', ['default'].concat(achords))
 
   // Selector for the duration (in milliseconds) for how long a note is ON
   gui.add(guiState, 'noteDuration', 100, 2000, 50)
-
-  // Show the computed note and velocity values
-  let msgMidi = gui.addFolder('MIDI Data')
-  msgMidi.add(guiState.midiData, 'Note', 0, 127).listen()
-  msgMidi.add(guiState.midiData, 'Velocity', 0, 127).listen()
-  msgMidi.open()
 
   // The input parameters have the most effect on accuracy and speed of the network
   let input = gui.addFolder('Input')
@@ -129,32 +138,41 @@ export async function setupGui (cameras, mobile) {
 
   multi.open()
 
-  let output = gui.addFolder('Output')
-  output.add(guiState.output, 'showVideo')
-  output.add(guiState.output, 'showSkeleton')
-  output.add(guiState.output, 'showPoints')
-  output.add(guiState.output, 'showBoundingBox')
-  output.add(guiState.output, 'showZones')
+  let canvas = gui.addFolder('Canvas')
+  canvas.add(guiState.canvas, 'showVideo')
+  canvas.add(guiState.canvas, 'showSkeleton')
+  canvas.add(guiState.canvas, 'showPoints')
+  canvas.add(guiState.canvas, 'showBoundingBox')
+  canvas.add(guiState.canvas, 'showZones')
 
   architectureController.onChange(function (architecture) {
     guiState.changeToArchitecture = architecture
   })
 
   algorithmController.onChange(function (value) {
-    switch (guiState.algorithm) {
-      case 'single-pose':
-        multi.close()
-        single.open()
-        break
-      case 'multi-pose':
-        single.close()
-        multi.open()
-        break
+    if (guiState.algorithm === 'multi-pose') {
+      single.close()
+      multi.open()
+    } else {
+      multi.close()
+      single.open()
     }
   })
 
-  midiDeviceController.onChange(function (value) {
-    setPreferredDevice(guiState.midiDevice)
+  outputDeviceController.onChange(function (value) {
+    if (!guiState.outputDevice || guiState.outputDevice === 'browser') {
+      midiDevice.close()
+      browserPreset.open()
+    } else {
+      browserPreset.close()
+      midiDevice.open()
+    }
+
+    setPreferredDevice(guiState.outputDevice)
+  })
+
+  browserPresetController.onChange(function (value) {
+    setPreferredPreset(guiState.browser.preset)
   })
 
   gui.close()
