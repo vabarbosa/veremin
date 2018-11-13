@@ -5,36 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="a video theremin based on PoseNet">
   <title>veremin | a video theremin based on PoseNet</title>
+  <link rel="stylesheet" type="text/css" href="css/fonts.css">
   <link rel="stylesheet" type="text/css" href="css/veremin.css">
 </head>
 <body>
-  <div class="background">
-    <div></div>
-  </div>
-  <div class="foreground">
-    <header>
-      <h1>Veremin</h1> <span>... video theremin based on PoseNet</span>
-    </header>
-
-    <div class="mainwrapper">
-      <div id="loading">
-        Loading the model...
-      </div>
-  
-      <div id="main" style="display:none">
-        <div class="videowrapper">
-          <video id="video" playsinline>
-          </video>
-          <canvas id="output" />
-        </div>
-      </div>
+  <header>
+    <span>veremin</span><br>
+    <span>a video theremin based on PoseNet</span>
+  </header>
+  <div id="info" class="v-info">loading...</div>
+  <main id="main">
+    <div class="v-wrapper">
+        <video id="video" playsinline> </video>
+        <canvas id="output" />
     </div>
-
-    <footer>
-      <span>From the mind of <a href="https://github.com/johncohn" target="_blank">John Cohn</a> | Fork me on <a href="https://github.com/vabarbosa/veremin" target="_blank">GitHub</a></span>
-      <span>Photo by <a href="https://unsplash.com/photos/drir5tDCWF4" target="_blank">Andrey Konstantinov</a> on Unsplash</span>
-    </footer>
-  </div>
+  </main>
+  <footer>
+    from the mind of <a href="https://github.com/johncohn" target="_blank">John Cohn</a> | 
+    in collaboration with <a href="https://github.com/vabarbosa" target="_blank">va barbosa</a> | 
+    fork me on <a href="https://github.com/vabarbosa/veremin" target="_blank">GitHub</a>
+  </footer>
 
   <script src="https://unpkg.com/dat.gui"></script>
   <script src="https://unpkg.com/@tensorflow/tfjs"></script>

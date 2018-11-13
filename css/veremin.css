@@ -1,6 +1,16 @@
 @charset "UTF-8";
 
-@import url('https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,700');
+:root {
+  --teal-30: #20d5d2;
+  --teal-10: #dbfbfb;
+  
+  --primary-back: var(--teal-30);
+  --secondary-back: var(--teal-10);
+
+  --height-factor: 3.5;
+  --short: calc(100vh / var(--height-factor));
+  --tall: calc(100vh - var(--short));
+}
 
 * {
   margin: 0;
@@ -9,100 +19,56 @@
 }
 
 body {
-  background-color: #111111;
-  color: whitesmoke;
-  font-family: 'IBM Plex Sans', sans-serif;
-  height: 100%;
-}
-
-body, div {
-  padding: 0;
-  margin: 0;
-}
-
-.background {
-  background: url("../img/andrey-konstantinov-683960-unsplash.jpg") right center no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
+  font-family: 'IBM Plex Mono', monospace;
   height: 100vh;
-  z-index: -10;
 
-  -webkit-filter: blur(1px);
-  -moz-filter: blur(1px);
-  -o-filter: blur(1px);
-  -ms-filter: blur(1px);
-  filter: blur(1px);
+  background: -webkit-linear-gradient(180deg, var(--primary-back) var(--tall), var(--secondary-back) var(--tall));
+  background: -o-linear-gradient(180deg, var(--primary-back) var(--tall), var(--secondary-back) var(--tall));
+  background: -moz-linear-gradient(180deg, var(--primary-back) var(--tall), var(--secondary-back) var(--tall));
+  background: linear-gradient(180deg, var(--primary-back) var(--tall), var(--secondary-back) var(--tall));
 }
 
-.background > div {
-  background-color: #111111;
-  height: 100vh;
-  opacity: 0.5;
-}
-
-.foreground {
-  display: flex;
-  flex-flow: column;
-  height: calc(100vh - 50px);
-  left: 0px;
-  padding: 25px 50px;
+header {
   position: fixed;
-  top: 0px;
-  width: calc(100vw - 100px);
-}
-
-header > h1 {
-  font-size: 48px;
-  margin-bottom: -5px;
+  top: 0;
+  left: 0;
+  padding: 10px;
+  right: 0;
 }
 
 header > span {
   font-size: small;
-  font-style: italic;
-  color: lightblue;
-  padding-left: 32px;
 }
 
-footer {
-  color: gray;
-  font-size: x-small;
+header > span:first-of-type {
+  font-size: xx-large;
+}
+
+.v-info {
+  font-size: 28px;
   position: fixed;
-  bottom: 0px;
+  top: calc(var(--tall) - 28px);
   left: 0;
-  padding: 10px;
-  width: 100%;
-  background-color: rgba(0,0,0, 0.25);
+  right: 0;
 }
 
-footer > span:last-of-type {
+.v-info,
+.v-wrapper {
+  text-align: center;
+}
+
+.v-wrapper {
   display: inline-block;
-  position: absolute;
-  right: 30px;
-}
-
-.mainwrapper {
-  height: calc(100% - 95px);
-  margin: 5px;
+  height: var(--tall);
   position: relative;
 }
 
-#loading {
+main {
+  position: fixed;
   text-align: center;
-  margin-top: 100px;
-}
-
-#main {
-  text-align: center;
-  min-height: calc(100% - 10px);
-}
-
-.videowrapper {
-  display: inline-block;
-  background-color: whitesmoke;
-  
-  -webkit-box-shadow: 0 8px 10px -5px rgba(255,255,255, 0.3);
-  -moz-box-shadow: 0 8px 10px -5px rgba(255,255,255, 0.3);
-  box-shadow: 0 8px 10px -5px rgba(255,255,255, 0.3);
+  top: calc(var(--short) / 2);
+  left: 0;
+  right: 0;
 }
 
 video {
@@ -113,6 +79,26 @@ video {
   display: none;
 }
 
-canvas {
-  background-color: whitesmoke;
+footer {
+  background-color: white;
+  font-size: x-small;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding: 10px;
+  right: 0;
+}
+
+@media only screen and (max-height: 500px) {
+  header {
+    padding: 5px;
+  }
+
+  header > span {
+    font-size: xx-small;
+  }
+  
+  header > span:first-of-type {
+    font-size: large;
+  }
 }

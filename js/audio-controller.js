@@ -218,18 +218,22 @@ export function playNote (value, volume, duration = 300, chordsInterval) {
  * Get the list of available MIDI devices
  */
 export function getMidiDevices () {
-  return navigator
-    .requestMIDIAccess()
-    .then(function (access) {
-      console.log('MIDIAccess', access)
+  if (navigator.requestMIDIAccess) {
+    return navigator
+      .requestMIDIAccess()
+      .then(function (access) {
+        console.log('MIDIAccess', access)
 
-      let midilist = Array.from(access.outputs.values())
-      midilist.forEach(e => {
-        midiOutputs[`${e.name} (${e.manufacturer})`] = e
+        let midilist = Array.from(access.outputs.values())
+        midilist.forEach(e => {
+          midiOutputs[`${e.name} (${e.manufacturer})`] = e
+        })
+
+        return midiOutputs
       })
-
-      return midiOutputs
-    })
+  } else {
+    return Promise.resolve(midiOutputs)
+  }
 }
 
 /**

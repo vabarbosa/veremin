@@ -1,18 +1,18 @@
 /* global posenet, requestAnimationFrame */
 
-import { loadVideo } from './camera-util.js'
+import { loadVideo, preferredVideoSize } from './camera-util.js'
 import { playNote, getMidiDevices } from './audio-controller.js'
 import { drawKeypoints, drawSkeleton, drawBoundingBox, drawBox } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
 
-const VIDEOWIDTH = 800
-const VIDEOHEIGHT = 600
+let VIDEOWIDTH = 800
+let VIDEOHEIGHT = 600
+let ZONEWIDTH = VIDEOWIDTH * 0.5
+let ZONEHEIGHT = VIDEOHEIGHT * 0.7
+const ZONEOFFSET = 10
 
 const LEFTWRIST = 9
 const RIGHTWRIST = 10
-const ZONEWIDTH = VIDEOWIDTH * 0.5
-const ZONEHEIGHT = VIDEOHEIGHT * 0.7
-const ZONEOFFSET = 10
 
 let posenetModel = null
 
@@ -29,6 +29,28 @@ const setUserMedia = function () {
     navigator.mozGetUserMedia
 }
 
+const resetVideoCanvasSize = function (video, canvas) {
+  const size = preferredVideoSize(video)
+
+  VIDEOWIDTH = size.width
+  VIDEOHEIGHT = size.height
+  ZONEWIDTH = VIDEOWIDTH * 0.5
+  ZONEHEIGHT = VIDEOHEIGHT * 0.7
+
+  if (canvas) {
+    canvas.setAttribute('width', VIDEOWIDTH)
+    canvas.setAttribute('height', VIDEOHEIGHT)
+    video.setAttribute('width', VIDEOWIDTH)
+    video.setAttribute('height', VIDEOHEIGHT)
+  }
+}
+
+const resize = function () {
+  const canvas = document.getElementById('output')
+  const video = document.getElementById('video')
+  resetVideoCanvasSize(video, canvas)
+}
+
 /**
  * Feeds an image to posenet to estimate poses - this is where the magic happens.
  * This function loops with a requestAnimationFrame method.
@@ -38,6 +60,7 @@ const detectPoseInRealTime = function (video) {
   const canvasCtx = canvas.getContext('2d')
   const flipHorizontal = true // since images are being fed from a webcam
 
+  resetVideoCanvasSize(video)
   canvas.width = VIDEOWIDTH
   canvas.height = VIDEOHEIGHT
 
@@ -216,20 +239,24 @@ const computePercentage = function (value, low, high) {
 const bindPage = async function () {
   posenetModel = await posenet.load(0.75) // load the PoseNet with architecture 0.75
 
-  document.getElementById('loading').style.display = 'none'
-  document.getElementById('main').style.display = 'block'
+  let info = document.getElementById('info')
+  let main = document.getElementById('main')
 
   const mobile = isMobile()
   let video
 
   try {
     video = await loadVideo('video', VIDEOWIDTH, VIDEOHEIGHT, mobile)
+    info.style.display = 'none'
+    main.style.display = 'block'
   } catch (e) {
-    let info = document.getElementById('info')
     info.textContent = 'Browser does not support video capture or this device does not have a camera'
+    main.style.display = 'none'
     info.style.display = 'block'
     throw e
   }
+
+  window.onresize = resize
 
   await setupGui([], mobile)
   detectPoseInRealTime(video)
