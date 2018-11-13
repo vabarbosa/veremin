@@ -1,10 +1,19 @@
+
+const isSafari = function () {
+  const hasSafari = /Safari/i.test(navigator.userAgent)
+  const hasChrome = /Chrome/i.test(navigator.userAgent)
+
+  return hasSafari && !hasChrome
+}
+
 /**
  * Load the video camera
  *
  * @param {Node | String} domNode - DOM Node or id of the DOM Node to load video into (default: 'video')
+ * @param {Boolean} mobile - True, if mobile device
  */
-export async function loadVideo (domNode) {
-  const video = await setupCamera(domNode)
+export async function loadVideo (domNode, mobile) {
+  const video = await setupCamera(domNode, mobile)
   video.play()
   return video
 }
@@ -22,18 +31,22 @@ async function setupCamera (domNode = 'video', mobile) {
 
   const video = typeof domNode === 'string' ? document.getElementById(domNode) : domNode
 
-  const size = preferredVideoSize()
+  const size = preferredVideoSize(null, mobile)
   video.width = size.width
   video.height = size.height
-
-  video.srcObject = await navigator.mediaDevices.getUserMedia({
+  let constraint = {
     'audio': false,
     'video': {
-      facingMode: 'user',
-      width: mobile ? undefined : size.width,
-      height: mobile ? undefined : size.height
+      facingMode: 'user'
     }
-  })
+  }
+
+  if (!isSafari) {
+    constraint.video.width = mobile ? undefined : size.width
+    constraint.video.height = mobile ? undefined : size.height
+  }
+
+  video.srcObject = await navigator.mediaDevices.getUserMedia(constraint)
 
   return new Promise((resolve) => {
     video.onloadedmetadata = () => {
@@ -42,31 +55,37 @@ async function setupCamera (domNode = 'video', mobile) {
   })
 }
 
-export const preferredVideoSize = function (video) {
-  const w = Math.min(window.innerWidth, 1400)
-  const h = Math.min(window.innerHeight, 1400)
-  let vw = 800
-  let vh = 600
-  let size = {}
-
-  if (video) {
-    vw = video.videoWidth
-    vh = video.videoHeight
+export const preferredVideoSize = function (video, mobile) {
+  let size = {
+    width: window.innerWidth,
+    height: window.innerHeight
   }
 
-  const videoRatio = vw / vh
+  if (!mobile) {
+    const w = Math.min(window.innerWidth, 1400)
+    const h = Math.min(window.innerHeight, 1400)
+    let vw = 800
+    let vh = 600
 
-  if (w / vw < h / vh) {
-    let width = w < 400 ? w : (w < 600 ? w * 0.85 : w * 0.7)
-    size = {
-      width: width,
-      height: width / videoRatio
+    if (video) {
+      vw = video.videoWidth
+      vh = video.videoHeight
     }
-  } else {
-    let height = h < 300 ? h : (h < 450 ? h * 0.85 : h * 0.7)
-    size = {
-      height: height,
-      width: height * videoRatio
+
+    const videoRatio = vw / vh
+
+    if (w / vw < h / vh) {
+      let width = w < 400 ? w : (w < 600 ? w * 0.85 : w * 0.7)
+      size = {
+        width: width,
+        height: width / videoRatio
+      }
+    } else {
+      let height = h < 300 ? h : (h < 450 ? h * 0.85 : h * 0.7)
+      size = {
+        height: height,
+        width: height * videoRatio
+      }
     }
   }
 

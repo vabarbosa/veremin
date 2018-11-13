@@ -5,23 +5,25 @@ import { playNote, getMidiDevices } from './audio-controller.js'
 import { drawKeypoints, drawSkeleton, drawBoundingBox, drawBox } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
 
-let VIDEOWIDTH = 800
-let VIDEOHEIGHT = 600
-let ZONEWIDTH = VIDEOWIDTH * 0.5
-let ZONEHEIGHT = VIDEOHEIGHT * 0.7
-const ZONEOFFSET = 10
-
-const LEFTWRIST = 9
-const RIGHTWRIST = 10
-
-let posenetModel = null
-
 const isMobile = function () {
   const isAndroid = /Android/i.test(navigator.userAgent)
   const isiOS = /iPhone|iPad|iPod/i.test(navigator.userAgent)
 
   return isAndroid || isiOS
 }
+
+let VIDEOWIDTH = 800
+let VIDEOHEIGHT = 600
+
+const ZONEOFFSET = 10
+const ZONEFACTOR = isMobile() ? 0.5 : 0.7
+let ZONEWIDTH = VIDEOWIDTH * 0.5
+let ZONEHEIGHT = VIDEOHEIGHT * ZONEFACTOR
+
+const LEFTWRIST = 9
+const RIGHTWRIST = 10
+
+let posenetModel = null
 
 const setUserMedia = function () {
   navigator.getUserMedia = navigator.getUserMedia ||
@@ -30,12 +32,12 @@ const setUserMedia = function () {
 }
 
 const resetVideoCanvasSize = function (video, canvas) {
-  const size = preferredVideoSize(video)
+  const size = preferredVideoSize(video, isMobile())
 
   VIDEOWIDTH = size.width
   VIDEOHEIGHT = size.height
   ZONEWIDTH = VIDEOWIDTH * 0.5
-  ZONEHEIGHT = VIDEOHEIGHT * 0.7
+  ZONEHEIGHT = VIDEOHEIGHT * ZONEFACTOR
 
   if (canvas) {
     canvas.setAttribute('width', VIDEOWIDTH)
@@ -246,7 +248,7 @@ const bindPage = async function () {
   let video
 
   try {
-    video = await loadVideo('video', VIDEOWIDTH, VIDEOHEIGHT, mobile)
+    video = await loadVideo('video', mobile)
     info.style.display = 'none'
     main.style.display = 'block'
   } catch (e) {
