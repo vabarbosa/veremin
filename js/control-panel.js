@@ -43,12 +43,14 @@ export let guiState = {
 /**
  * Sets up control panel on the top-right of the window
  */
-export async function setupGui (cameras, mobile) {
+export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   if (cameras.length > 0) {
     guiState.camera = cameras[0].deviceId
   }
 
-  const gui = new dat.GUI({ width: 300 })
+  const gui = new dat.GUI({ width: 300, autoPlace: false })
+  const controlPanel = typeof domNode === 'string' ? document.getElementById(domNode) : domNode
+  controlPanel.appendChild(gui.domElement)
 
   // Selector for pose detection algorithm.
   // Single-pose algorithm is faster and simpler when only one person to be in the frame. Multi-pose works for more than one person in the frame.
@@ -174,6 +176,4 @@ export async function setupGui (cameras, mobile) {
   browserPresetController.onChange(function (value) {
     setPreferredPreset(guiState.browser.preset)
   })
-
-  gui.close()
 }

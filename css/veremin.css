@@ -44,6 +44,16 @@ header > span:first-of-type {
   font-size: xx-large;
 }
 
+header > button,
+#control-panel > button {
+  background: none;
+  border: 0px none;
+  cursor: pointer;
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
 .v-info {
   font-size: 28px;
   position: fixed;
@@ -79,6 +89,27 @@ video {
   display: none;
 }
 
+#control-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #000;
+  color: #fff;
+}
+
+.slider {
+  overflow-x: hidden;
+  left: calc(100vw - 300px);
+
+	transition-property: all;
+	transition-duration: .5s;
+	transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+}
+.slider.closed {
+	left: 100vw;
+}
+
 footer {
   background-color: white;
   font-size: x-small;
@@ -101,4 +132,18 @@ footer {
   header > span:first-of-type {
     font-size: large;
   }
+
+  .slider {
+    left: 0;
+  }
+}
+
+/** dat.gui override **/
+
+.dg.main {
+  margin-top: 45px;
+}
+
+.dg.main .close-button {
+  display: none;
 }
