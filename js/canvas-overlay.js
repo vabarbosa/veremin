@@ -60,31 +60,13 @@ export function drawKeypoints (keypoints, minConfidence, ctx, scale = 1) {
 
     const { y, x } = keypoint.position
     if (i === 10) {
-      drawPoint(ctx, y * scale, x * scale, 3, 'red')
+      drawPoint(ctx, y * scale, x * scale, 6, 'red')
     } else if (i === 9) {
-      drawPoint(ctx, y * scale, x * scale, 3, 'orange')
+      drawPoint(ctx, y * scale, x * scale, 6, 'orange')
     } else {
       drawPoint(ctx, y * scale, x * scale, 3, color)
     }
   }
-}
-
-/**
- * Draw the bounding box of a pose. For example, for a whole person standing in
- * an image, the bounding box will begin at the nose and extend to one of ankles
- */
-export function drawBoundingBox (keypoints, ctx) {
-  const boundingBox = posenet.getBoundingBox(keypoints)
-
-  ctx.rect(
-    boundingBox.minX,
-    boundingBox.minY,
-    boundingBox.maxX - boundingBox.minX,
-    boundingBox.maxY - boundingBox.minY
-  )
-
-  ctx.strokeStyle = boundingBoxColor
-  ctx.stroke()
 }
 
 /**

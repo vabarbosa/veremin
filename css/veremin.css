@@ -138,7 +138,32 @@ footer {
   }
 }
 
+header > button {
+  animation-name: spin;
+  animation-duration: 3000ms;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-play-state: paused;
+}
+
+header > button:hover {
+  animation-play-state: running;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /** dat.gui override **/
+
+.dg {
+  font-family: 'IBM Plex Sans', sans-serif;
+}
 
 .dg.main {
   margin-top: 45px;
@@ -146,4 +171,24 @@ footer {
 
 .dg.main .close-button {
   display: none;
+}
+
+.dg .cr.string,
+.dg .cr.number,
+.dg .cr.boolean {
+  border-left: 2px solid var(--secondary-back) !important;
+}
+
+.dg .folder .cr.string,
+.dg .folder .cr.number,
+.dg .folder .cr.boolean {
+  border-left: 1px solid var(--secondary-back) !important;
+}
+
+.dg .c .slider-fg {
+  background: var(--primary-back) !important;
+}
+
+.dg .cr.number input[type=text] {
+  color: var(--primary-back) !important;
 }

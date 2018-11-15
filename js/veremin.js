@@ -2,7 +2,7 @@
 
 import { loadVideo, preferredVideoSize } from './camera-util.js'
 import { playNote, getMidiDevices } from './audio-controller.js'
-import { drawKeypoints, drawSkeleton, drawBoundingBox, drawBox } from './canvas-overlay.js'
+import { drawKeypoints, drawSkeleton, drawBox } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
 
 const isMobile = function () {
@@ -163,9 +163,6 @@ const detectPoseInRealTime = function (video) {
         }
         if (guiState.canvas.showSkeleton) {
           drawSkeleton(keypoints, minPartConfidence, canvasCtx)
-        }
-        if (guiState.canvas.showBoundingBox) {
-          drawBoundingBox(keypoints, canvasCtx)
         }
       }
     })

@@ -35,7 +35,6 @@ export let guiState = {
     showVideo: true,
     showSkeleton: true,
     showPoints: true,
-    showBoundingBox: false,
     showZones: true
   }
 }
@@ -143,7 +142,6 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   canvas.add(guiState.canvas, 'showVideo')
   canvas.add(guiState.canvas, 'showSkeleton')
   canvas.add(guiState.canvas, 'showPoints')
-  canvas.add(guiState.canvas, 'showBoundingBox')
   canvas.add(guiState.canvas, 'showZones')
 
   architectureController.onChange(function (architecture) {
