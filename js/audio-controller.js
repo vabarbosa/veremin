@@ -2,7 +2,6 @@
 
 import { presets } from './tonejs-presets.js'
 import { chords } from './chord-intervals.js'
-import { noteFreqs } from './note-frequencies.js'
 
 const CHANNEL = 1 // channels 1-16
 const NOTEOFF = (0x8 << 4) + (CHANNEL - 1) // equals 128 (with channel = 1)
@@ -55,11 +54,11 @@ const playUsingMidiDevice = function (midiNote, midiVelocity, duration) {
 /**
  * Play a note using the Tone.js library
  *
- * @param {Number} value - value (between 0 - 1) to use to select note from 'noteFreqs' to play
+ * @param {Number} midiNote - the MIDI note to play
  * @param {Number} gain - volume to play the note at (between 0 - 1)
  * @param {Number} duration - how long (in ms) to play the note
  */
-const playUsingTonejs = function (value, gain, duration) {
+const playUsingTonejs = function (midiNote, gain, duration) {
   // convert duration from ms to seconds
   const d = duration / 1000
 
@@ -68,19 +67,7 @@ const playUsingTonejs = function (value, gain, duration) {
     tonejsPlaying = true
   }
 
-  // get available notes
-  const notes = Object.keys(noteFreqs)
-
-  let note = 0
-  if (notes.length) {
-    // select corresponding note to play
-    note = Math.round(value * (notes.length - 1))
-    note = notes[note]
-  } else {
-    // convert to freq than to corresponding note to play
-    note = (value * 2000) + 20
-    note = Tone.Frequency(note, 'hz').toNote()
-  }
+  const note = Tone.Frequency(midiNote, 'midi').toNote()
 
   tonejsInstrument.volume.value = Tone.gainToDb(gain)
 
@@ -92,13 +79,13 @@ const playUsingTonejs = function (value, gain, duration) {
 /**
  * Play a note using the Web Audio API
  *
- * @param {Number} value - value (between 0 - 1) to convert to frequency (20 - 2000) to play
+ * @param {Number} midiNote - the MIDI note to play
  * @param {Number} gain - volume to play the note at (between 0 - 1)
  * @param {Number} duration - how long (in ms) to play the note
  */
-const playUsingWebAudio = function (value, gain, duration) {
-  // convert value to frequency
-  const f = (value * 2000) + 20
+const playUsingWebAudio = function (midiNote, gain, duration) {
+  // convert midiNote to frequency
+  const f = Tone.Frequency(midiNote, 'midi').toFrequency()
 
   // console.log(`f=${f}, g=${gain}`)
 
@@ -181,9 +168,9 @@ export function setPreferredDevice (name) {
 /**
  * Play the given value at the given volume for the given duration using the given chords
  *
- * @param {Number} value - the MIDI note to play
- * @param {Number} volume - the volume to play the note at
- * @param {Number} duration - how long (in ms) to play the note
+ * @param {Number} value - a number in the range (0 to 1) to correspond to MIDI chord to play
+ * @param {Number} volume - the volume in range (0 to 1) to play the tone at
+ * @param {Number} duration - how long (in ms) to play the tone
  */
 export function playNote (value, volume, duration = 300, chordsInterval) {
   if (value && volume) {
@@ -191,24 +178,28 @@ export function playNote (value, volume, duration = 300, chordsInterval) {
     value = value < 0 ? 0 : (value > 1 ? 1 : value)
     volume = volume < 0 ? 0 : (volume > 1 ? 1 : volume)
 
-    if (selectedMidiDevice) {
-      let chordsArray = []
-      if (chordsInterval && chordsInterval !== 'default' && chords.hasOwnProperty(chordsInterval)) {
-        chordsArray = chords[chordsInterval]
-      }
-
-      let midiNotes = computeNote(value, 0, 1, chordsArray)
-      let v = computeVelocity(volume, 0, 1, chordsArray)
-
-      midiNotes.forEach(n => {
-        // console.log(`n=${n}, v=${v}`)
-        playUsingMidiDevice(n, v, duration, chordsArray)
-      })
-    } else if (tonejsInstrument) {
-      playUsingTonejs(value, volume, duration)
-    } else {
-      playUsingWebAudio(value, volume, duration)
+    let chordsArray = null
+    if (chordsInterval && chordsInterval !== 'default' && chords.hasOwnProperty(chordsInterval)) {
+      chordsArray = chords[chordsInterval]
     }
+
+    let midiNotes = computeNote(value, 0, 1, chordsArray)
+    let v = volume
+    let playerFunction
+
+    if (selectedMidiDevice) {
+      v = computeVelocity(volume, 0, 1)
+      playerFunction = playUsingMidiDevice
+    } else if (tonejsInstrument) {
+      playerFunction = playUsingTonejs
+    } else {
+      playerFunction = playUsingWebAudio
+    }
+
+    midiNotes.forEach(n => {
+      // console.log(`n=${n}, v=${v}`)
+      playerFunction(n, v, duration)
+    })
   } else {
     stopWebAudio()
   }
