@@ -3,19 +3,19 @@
 import { getMidiDevices, setPreferredDevice, getBrowserPresets, setPreferredPreset } from './audio-controller.js'
 import { chords } from './chord-intervals.js'
 
+const DEFAULTCHORDS = 'minor0'
+
 /**
  *  Defines control panel settings and default values
  * */
 export let guiState = {
   algorithm: 'multi-pose',
   outputDevice: 'browser',
-  midiDevice: {
-    chordIntervals: 'default'
-  },
+  chordIntervals: 'default',
+  noteDuration: 300,
   browser: {
     preset: 'default'
   },
-  noteDuration: 300,
   input: {
     mobileNetArchitecture: '0.75',
     outputStride: 16,
@@ -67,6 +67,19 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   // Selector for MIDI device (with additional option for Browser Audio API)
   const outputDeviceController = gui.add(guiState, 'outputDevice', ['browser'].concat(mouts))
 
+  // Get available chords
+  const achords = Object.keys(chords)
+  if (achords.length > 0) {
+    let defaultIndex = achords.indexOf(DEFAULTCHORDS)
+    guiState.chordIntervals = defaultIndex >= 0 ? achords[defaultIndex] : achords[0]
+  }
+
+  // Selector for values to use for the MIDI notes
+  gui.add(guiState, 'chordIntervals', ['default'].concat(achords))
+
+  // Selector for the duration (in milliseconds) for how long a note is ON
+  gui.add(guiState, 'noteDuration', 100, 2000, 50)
+
   const browserPreset = gui.addFolder('Browser')
 
   // Get available browser presets
@@ -78,20 +91,6 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
 
   // Selector for Tone.js presets to use in the browser
   const browserPresetController = browserPreset.add(guiState.browser, 'preset', ['default'].concat(binst))
-
-  const midiDevice = gui.addFolder('MIDI Device')
-
-  // Get available chords
-  const achords = Object.keys(chords)
-  if (achords.length > 0) {
-    guiState.midiDevice.chordIntervals = achords[0]
-  }
-
-  // Selector for values to use for the MIDI notes
-  midiDevice.add(guiState.midiDevice, 'chordIntervals', ['default'].concat(achords))
-
-  // Selector for the duration (in milliseconds) for how long a note is ON
-  gui.add(guiState, 'noteDuration', 100, 2000, 50)
 
   // The input parameters have the most effect on accuracy and speed of the network
   let input = gui.addFolder('Input')
@@ -163,11 +162,9 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
 
   outputDeviceController.onChange(function (value) {
     if (!guiState.outputDevice || guiState.outputDevice === 'browser') {
-      midiDevice.close()
       browserPreset.open()
     } else {
       browserPreset.close()
-      midiDevice.open()
     }
 
     setPreferredDevice(guiState.outputDevice)

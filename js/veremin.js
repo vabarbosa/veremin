@@ -149,7 +149,7 @@ const detectPoseInRealTime = function (video) {
               position.right.vertical, // note
               position.left.horizontal, // volume
               guiState.noteDuration,
-              guiState.midiDevice.chordIntervals === 'default' ? null : guiState.midiDevice.chordIntervals
+              guiState.chordIntervals === 'default' ? null : guiState.chordIntervals
             )
           } else {
             playNote(0, 0)
