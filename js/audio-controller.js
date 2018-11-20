@@ -6,16 +6,21 @@ import { chords } from './chord-intervals.js'
 const CHANNEL = 1 // channels 1-16
 const NOTEOFF = (0x8 << 4) + (CHANNEL - 1) // equals 128 (with channel = 1)
 const NOTEON = (0x9 << 4) + (CHANNEL - 1) // equals 144 (with channel = 1)
+const FFTSIZE = 512
 
 let selectedMidiDevice = null
 let midiOutputs = []
+let webAudioPlaying = false
 
 let audioCtx = null
 let oscillator = null
 let gainNode = null
-let webAudioPlaying = false
+let analyser = null
+let dataArray = null
+
 let tonejsInstrument = null
 let tonejsPlaying = false
+let tonejsAnalyser = null
 
 /**
  * Get or create the Web Audio context
@@ -24,11 +29,14 @@ const getAudioContext = function () {
   if (!audioCtx) {
     audioCtx = new AudioContext()
     gainNode = audioCtx.createGain()
-
     oscillator = audioCtx.createOscillator()
-    oscillator.connect(gainNode)
+    analyser = audioCtx.createAnalyser()
 
-    gainNode.connect(audioCtx.destination)
+    oscillator.connect(gainNode)
+    gainNode.connect(analyser)
+
+    analyser.fftSize = FFTSIZE
+    dataArray = new Float32Array(analyser.frequencyBinCount)
   }
 
   return audioCtx
@@ -44,6 +52,8 @@ const getAudioContext = function () {
 const playUsingMidiDevice = function (midiNote, midiVelocity, duration) {
   // console.log(`NOTEON('${midiNote},${midiVelocity}')`)
   selectedMidiDevice.send([NOTEON, midiNote, midiVelocity])
+
+  playUsingWebAudio(midiNote, midiVelocity / 127, duration, true)
 
   setTimeout(function () {
     // console.log(`NOTEOFF('${midiNote},${midiVelocity}')`)
@@ -82,8 +92,9 @@ const playUsingTonejs = function (midiNote, gain, duration) {
  * @param {Number} midiNote - the MIDI note to play
  * @param {Number} gain - volume to play the note at (between 0 - 1)
  * @param {Number} duration - how long (in ms) to play the note
+ * @param {Boolean} silent - true, if output should not be connected
  */
-const playUsingWebAudio = function (midiNote, gain, duration) {
+const playUsingWebAudio = function (midiNote, gain, duration, silent) {
   // convert midiNote to frequency
   const f = Tone.Frequency(midiNote, 'midi').toFrequency()
 
@@ -93,9 +104,12 @@ const playUsingWebAudio = function (midiNote, gain, duration) {
 
   if (!webAudioPlaying) {
     oscillator = audioCtx.createOscillator()
-
     oscillator.frequency.setTargetAtTime(f, audioCtx.currentTime, 0.001)
     gainNode.gain.setTargetAtTime(gain, audioCtx.currentTime, 0.001)
+
+    if (!silent) {
+      analyser.connect(audioCtx.destination)
+    }
 
     oscillator.connect(gainNode)
     oscillator.start(audioCtx.currentTime)
@@ -113,10 +127,23 @@ const stopWebAudio = function () {
   if (webAudioPlaying) {
     gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5)
     oscillator.stop(audioCtx.currentTime + 0.5)
+    analyser.disconnect()
     webAudioPlaying = false
   } else if (tonejsPlaying) {
     Tone.Transport.stop()
     tonejsPlaying = false
+  }
+}
+
+/**
+ * Get time domain data from current analyser
+ */
+export function getAnalyzerValue () {
+  if (webAudioPlaying) {
+    analyser.getFloatTimeDomainData(dataArray)
+    return dataArray
+  } else if (tonejsInstrument) {
+    return tonejsAnalyser.getValue()
   }
 }
 
@@ -138,10 +165,20 @@ export function setPreferredPreset (name) {
     if (tonejsInstrument) {
       tonejsInstrument.dispose()
     }
+    if (tonejsAnalyser) {
+      tonejsAnalyser.dispose()
+    }
     tonejsInstrument = null
+    tonejsAnalyser = null
   } else {
     const instrument = presets[name]
     tonejsInstrument = new Tone[instrument.instrument]().toMaster()
+
+    if (!tonejsAnalyser) {
+      tonejsAnalyser = new Tone.Waveform(FFTSIZE / 2)
+    }
+
+    tonejsInstrument.connect(tonejsAnalyser)
 
     try {
       // instrument['volume'] = 0

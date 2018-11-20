@@ -1,8 +1,8 @@
 /* global posenet, requestAnimationFrame */
 
 import { loadVideo, preferredVideoSize } from './camera-util.js'
-import { playNote, getMidiDevices } from './audio-controller.js'
-import { drawKeypoints, drawSkeleton, drawBox } from './canvas-overlay.js'
+import { playNote, getMidiDevices, getAnalyzerValue } from './audio-controller.js'
+import { drawKeypoints, drawSkeleton, drawBox, drawWave } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
 
 const isMobile = function () {
@@ -61,6 +61,7 @@ const detectPoseInRealTime = function (video) {
   const canvas = document.getElementById('output')
   const canvasCtx = canvas.getContext('2d')
   const flipHorizontal = true // since images are being fed from a webcam
+  const waveCtx = document.getElementById('wave').getContext('2d')
 
   resetVideoCanvasSize(video)
   canvas.width = VIDEOWIDTH
@@ -167,6 +168,11 @@ const detectPoseInRealTime = function (video) {
       }
     })
 
+    if (guiState.canvas.showWaveform) {
+      const value = getAnalyzerValue()
+      drawWave(value, waveCtx)
+    }
+
     requestAnimationFrame(poseDetectionFrame)
   }
 
@@ -261,15 +267,18 @@ const bindPage = async function () {
   detectPoseInRealTime(video)
 }
 
+// init the app
+const init = function () {
+  const waveCtx = document.getElementById('wave').getContext('2d')
+  drawWave([], waveCtx)
+
+  setUserMedia()
+  getMidiDevices().then(bindPage)
+}
+
 // run the app
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function () {
-    setUserMedia()
-    getMidiDevices().then(bindPage)
-  })
+  document.addEventListener('DOMContentLoaded', init)
 } else {
-  setTimeout(function () {
-    setUserMedia()
-    getMidiDevices().then(bindPage)
-  }, 500)
+  setTimeout(init, 500)
 }

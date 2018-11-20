@@ -1,5 +1,6 @@
 /* global posenet */
 
+const teal10 = '#dbfbfb'
 const color = 'aqua'
 const boundingBoxColor = 'red'
 const lineWidth = 2
@@ -76,4 +77,36 @@ export function drawBox (x1, y1, x2, y2, ctx) {
   ctx.rect(x1, y1, x2 - x1, y2 - y1)
   ctx.strokeStyle = boundingBoxColor
   ctx.stroke()
+}
+
+/**
+ * Draw waveform onto a canvas
+ */
+export function drawWave (points, ctx) {
+  const scale = function (val, low, high, min, max) {
+    return (val - low) / (high - low) * (max - min) + min
+  }
+
+  const w = ctx.canvas.width
+  const h = ctx.canvas.height
+  const m = 0.05 * h
+  const pts = typeof points === 'object' && points.length ? points : [0, 0]
+  const len = pts.length
+
+  ctx.clearRect(0, 0, w, h)
+  ctx.beginPath()
+  ctx.moveTo(w, h)
+  ctx.lineTo(0, h)
+
+  for (var p = 0; p < len; p++) {
+    const x = scale(p, 0, len - 1, 0, w)
+    const y = scale(pts[p], -1, 1, h - m, m)
+
+    ctx.lineTo(x, y)
+  }
+
+  ctx.lineTo(w, h)
+  ctx.lineCap = 'round'
+  ctx.fillStyle = teal10
+  ctx.fill()
 }

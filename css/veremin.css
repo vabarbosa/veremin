@@ -89,6 +89,15 @@ video {
   display: none;
 }
 
+#wave {
+  background-color: var(--teal-30);
+  height: var(--short);
+  position: absolute;
+  top: calc(100vh - var(--short) * 1.5);
+  width: 100%;
+  z-index: -1;
+}
+
 #control-panel {
   position: fixed;
   right: 0;

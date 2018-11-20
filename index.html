@@ -25,9 +25,11 @@
   <main id="main">
     <div class="v-wrapper">
         <video id="video" playsinline controls="true"> </video>
-        <canvas id="output" />
+        <canvas id="output"></canvas>
     </div>
   </main>
+
+  <canvas id="wave"></canvas>
 
   <div id="control-panel" class="slider closed">
     <button onclick="document.getElementById('control-panel').classList.add('closed')">
@@ -50,9 +52,9 @@
   
   <script type="module" src="js/chord-intervals.js"></script>
   <script type="module" src="js/tonejs-presets.js"></script>
+  <script type="module" src="js/canvas-overlay.js"></script>
   <script type="module" src="js/camera-util.js"></script>
   <script type="module" src="js/audio-controller.js"></script>
-  <script type="module" src="js/canvas-overlay.js"></script>
   <script type="module" src="js/control-panel.js"></script>
   <script type="module" src="js/veremin.js"></script>
 </body>
