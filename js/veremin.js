@@ -244,27 +244,24 @@ const computePercentage = function (value, low, high) {
 const bindPage = async function () {
   posenetModel = await posenet.load(0.75) // load the PoseNet with architecture 0.75
 
-  let info = document.getElementById('info')
-  let main = document.getElementById('main')
+  const body = document.getElementsByTagName('body')[0]
 
   const mobile = isMobile()
   let video
 
   try {
     video = await loadVideo('video', mobile)
-    info.style.display = 'none'
-    main.style.display = 'block'
+    await setupGui([], mobile)
+    body.className = 'ready'
+    detectPoseInRealTime(video)
   } catch (e) {
+    body.className = 'error'
+    const info = document.getElementById('info')
     info.textContent = 'Browser does not support video capture or this device does not have a camera'
-    main.style.display = 'none'
-    info.style.display = 'block'
     throw e
   }
 
   window.onresize = resize
-
-  await setupGui([], mobile)
-  detectPoseInRealTime(video)
 }
 
 // init the app

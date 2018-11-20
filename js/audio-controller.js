@@ -1,4 +1,4 @@
-/* global AudioContext, Tone */
+/* global Tone */
 
 import { presets } from './tonejs-presets.js'
 import { chords } from './chord-intervals.js'
@@ -27,7 +27,7 @@ let tonejsAnalyser = null
  */
 const getAudioContext = function () {
   if (!audioCtx) {
-    audioCtx = new AudioContext()
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)()
     gainNode = audioCtx.createGain()
     oscillator = audioCtx.createOscillator()
     analyser = audioCtx.createAnalyser()

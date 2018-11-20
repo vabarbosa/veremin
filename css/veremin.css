@@ -44,14 +44,28 @@ header > span:first-of-type {
   font-size: xx-large;
 }
 
-header > button,
-#control-panel > button {
+#open-cp-btn,
+#close-cp-btn {
   background: none;
   border: 0px none;
   cursor: pointer;
   position: absolute;
   right: 10px;
   top: 10px;
+}
+
+#open-cp-btn {
+  display: none;
+  right: 20px;
+  top: 15px;
+}
+
+#open-cp-btn:hover svg {
+  fill: var(--teal-10);
+}
+
+body.ready #open-cp-btn {
+  display: initial;
 }
 
 .v-info {
@@ -81,6 +95,14 @@ main {
   right: 0;
 }
 
+body.error main {
+  display: none;
+}
+
+body.ready .v-info {
+  display: none;
+}
+
 video {
   -moz-transform: scaleX(-1);
   -o-transform: scaleX(-1);
@@ -90,12 +112,16 @@ video {
 }
 
 #wave {
-  background-color: var(--teal-30);
+  background-color: transparent;
   height: var(--short);
   position: absolute;
   top: calc(100vh - var(--short) * 1.5);
   width: 100%;
   z-index: -1;
+}
+
+body.ready #wave {
+  background-color: var(--teal-30);
 }
 
 #control-panel {
@@ -145,18 +171,6 @@ footer {
   .slider {
     left: 0;
   }
-}
-
-header > button {
-  animation-name: spin;
-  animation-duration: 3000ms;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
-  animation-play-state: paused;
-}
-
-header > button:hover {
-  animation-play-state: running;
 }
 
 @keyframes spin {
