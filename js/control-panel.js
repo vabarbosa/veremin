@@ -48,7 +48,6 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
     guiState.camera = cameras[0].deviceId
   }
   if (mobile) {
-    guiState.algorithm = 'single-pose'
     guiState.canvas.showWaveform = false
   }
 
