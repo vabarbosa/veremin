@@ -47,6 +47,10 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   if (cameras.length > 0) {
     guiState.camera = cameras[0].deviceId
   }
+  if (mobile) {
+    guiState.algorithm = 'single-pose'
+    guiState.canvas.showWaveform = false
+  }
 
   const gui = new dat.GUI({ width: 300, autoPlace: false })
   const controlPanel = typeof domNode === 'string' ? document.getElementById(domNode) : domNode
