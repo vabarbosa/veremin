@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="130px" height="200px" viewBox="0 0 130 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>veremin</title>
+    <desc>a video theremin based on PoseNet</desc>
+    <g id="Page-5" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="note" transform="translate(6.000000, 20.000000)" fill-rule="nonzero" stroke-width="8">
+            <g id="teal" transform="translate(75.631704, 93.675141) rotate(-7.000000) translate(-75.631704, -93.675141) translate(25.150726, 12.489377)" stroke="#20D5D2">
+                <ellipse id="Oval" fill="#20D5D2" transform="translate(44.235149, 136.708530) rotate(-35.000000) translate(-42.035149, -133.208530) " cx="42.035149" cy="133.20853" rx="32.8776299" ry="18.227899"></ellipse>
+                <path d="M5.82085399,6.25152518 L16.8073087,26.5603231 L60.1187857,29.7299187 C77.9144318,31.0322294 94.3059059,20.0352254 99.8491793,3.07488486 L98.1961656,3.75029522 C83.0963382,9.91998385 66.7164969,12.3022702 50.4847797,10.6894458 L5.82085399,6.25152518 Z" id="Path" fill="#20D5D2" transform="translate(52.835017, 16.454592) rotate(-3.000000) translate(-52.835017, -16.454592) "></path>
+                <path d="M5.27718343,9.80284376 L72.8186375,120.483933" id="Line-2" stroke-linecap="round"></path>
+            </g>
+            <g id="outline" transform="translate(67.929317, 92.219548) rotate(-10.000000) translate(-67.929317, -92.219548) translate(14.429317, 8.219548)" stroke="#000000">
+                <ellipse id="Oval" transform="translate(40.542503, 136.185761) rotate(-35.000000) translate(-37.942503, -134.185761) " cx="37.9425031" cy="134.185761" rx="36.8776299" ry="22.227899"></ellipse>
+                <path d="M5.08018127,1.3911312 L57.2438002,6.57424027 C72.8262487,8.12255175 88.5508963,5.83555682 103.046731,-0.0873442605 L112.699457,-4.03138398 L110.014775,4.18273963 C103.900294,22.8907602 85.8197589,35.0209516 66.1903587,33.5844442 L20.6946774,30.2550054 L5.08018127,1.3911312 Z" id="Path" transform="translate(59.198535, 16.319786) rotate(-3.000000) translate(-59.198535, -16.319786) "></path>
+                <path d="M6.41227821,8.13893873 L72.9012659,118.649227" id="Line-2" stroke-linecap="round"></path>
+            </g>
+        </g>
+    </g>
+</svg>

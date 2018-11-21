@@ -2,3 +2,4 @@
 .vscode
 package*.json
 node_modules
+manifest.json
