@@ -6,7 +6,7 @@ It builds upon the PoseNet [Camera Demo](https://github.com/tensorflow/tfjs-mode
 
 PoseNet is used to predict the location of your wrists within the video. The app takes the predictions and converts them to tones in the browser or to MIDI values which get sent to a connected MIDI device.
 
-Browsers must allow [access to the webcam](https://caniuse.com/#feat=stream) and support the [Web Audio API](https://caniuse.com/#feat=audio-api). In addition, to integrate with an optional MIDI device the browser will need to support the [Web MIDI API](https://caniuse.com/#feat=midi) (e.g., Chrome browser version 43 or later). 
+Browsers must allow [access to the webcam](https://caniuse.com/#feat=stream) and support the [Web Audio API](https://caniuse.com/#feat=audio-api). Optionally, to integrate with a MIDI device the browser will need to support the [Web MIDI API](https://caniuse.com/#feat=midi) (e.g., Chrome browser version 43 or later). 
 
 
 ## Featured tools & technologies
