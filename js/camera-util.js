@@ -41,7 +41,7 @@ async function setupCamera (domNode = 'video', mobile) {
     }
   }
 
-  if (!isSafari) {
+  if (!isSafari()) {
     constraint.video.width = mobile ? undefined : size.width
     constraint.video.height = mobile ? undefined : size.height
   }
