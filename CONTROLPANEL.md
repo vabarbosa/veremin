@@ -1,6 +1,8 @@
 # Control Panel Guide
 
-The Veremin control panel is powered by [dat.GUI](https://github.com/dataarts/dat.gui). The control panel allows you to configure various settings and tweak your Veremin experience.
+The Veremin control panel is powered by [dat.GUI](https://github.com/dataarts/dat.gui).
+
+The control panel allows you to configure various settings and tweak your experience.
 
 Below options are available for configuration in the control panel:
 
@@ -17,8 +19,7 @@ Below options are available for configuration in the control panel:
 
 | Option | Default | Description |
 |---|---|---|
-| preset | `Synth1` | Instrument [presets for Tone.js](https://tonejs.github.io/Presets) when using the browser for audio as defined in [tonejs-presets.js](https://github.com/vabarbosa/veremin/blob/master/js/tonejs-presets.js) |
-|  |  |  |
+| preset | `Synth1` | Instrument [presets for Tone.js](https://tonejs.github.io/Presets) when using the browser for audio as defined in [tonejs-presets.js](https://github.com/vabarbosa/veremin/blob/master/js/tonejs-presets.js). Does not effect MIDI output devices. |
 
 ### Input
 

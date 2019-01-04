@@ -46,12 +46,19 @@ header > span:first-of-type {
 
 #open-cp-btn,
 #close-cp-btn,
-#close-info-btn {
+#close-info-btn,
+#help-cp-link {
   background: none;
   border: 0px none;
   cursor: pointer;
   position: absolute;
   right: 10px;
+  top: 10px;
+}
+
+#help-cp-link {
+  left: 10px;
+  right: initial;
   top: 10px;
 }
 

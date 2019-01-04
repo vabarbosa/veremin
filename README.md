@@ -114,15 +114,20 @@ To run the app locally:
 
 ## Using the app
 
-Before using the app, connect a MIDI synthesizer to your computer. If you do not have a MIDI synthesizer you can download and run a software synthesizer such as [SimpleSynth](http://notahat.com/simplesynth/). If no (hardware or software) synthesizer is detected the app defaults to using the Web Audio API to generate tones from the browser.
+At a minimum, your browsers must allow [access to the web camera](https://caniuse.com/#feat=stream) and support the [Web Audio API](https://caniuse.com/#feat=audio-api).
 
-Open your browser and access the app. You will may to accept the browser's prompt to allow access to the web camera. Once access is allowed, the PoseNet model gets loaded (it may take a few seconds).
+In addition, if it supports the [Web MIDI API](https://caniuse.com/#feat=midi), you may connect a MIDI synthesizer to your computer. If you do not have a MIDI synthesizer you can download and run a software synthesizer such as [SimpleSynth](http://notahat.com/simplesynth/).
 
-After the model is loaded, the video will load and include an overlay with skeletal and joint information detected by PoseNet. The overlay also include two adjacent zones/boxes. When your wrists are detected within each of the zones, you should here some sound.
+If your browser does not support the Web MIDI API or no (hardware or software) synthesizer is detected, the app defaults to using the Web Audio API to generate tones in the browser.
 
-You can move your right hand/arm up and down (in the right zone) to generate different notes. You can move your left hand/arm left and right (in the left zone) to adjust the velocity of the note.
+Open your browser and go to the app URL. Depending on your browser, you may need to access the app using the **`https`** protocol instead of the **`http`**. You may also have to accept the browser's prompt to allow access to the web camera. Once access is allowed, the PoseNet model gets loaded (it may take a few seconds).
 
-Click on the Controls icon (top right) to open the control panel. In the control panel you are able to change MIDI devices (if more than one is connected), configure PoseNet settings, set what is shown in the overlay, and configure additional options.
+After the model is loaded, the video stream from the web camera will appear and include an overlay with skeletal and joint information detected by PoseNet. The overlay will also include two adjacent zones/boxes. When your wrists are detected within each of the zones, you should here some sound.
+
+- Move your right hand/arm up and down (in the right zone) to generate different notes
+- Move your left hand/arm left and right (in the left zone) to adjust the velocity of the note.
+
+Click on the Controls icon (top right) to open the control panel. In the control panel you are able to change MIDI devices (if more than one is connected), configure PoseNet settings, set what is shown in the overlay, and configure additional options. More information about the control panel options is available [here](https://github.com/vabarbosa/veremin/blob/master/CONTROLPANEL.md).
 
 ## Links
 
