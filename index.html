@@ -39,8 +39,14 @@
     <span>veremin</span><br>
     <span>a video theremin based on PoseNet</span>
     <button id="open-cp-btn" onclick="document.getElementById('control-panel').classList.remove('closed')">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"  height="24" width="24">
-        <path d="M30 7h-5.1a5 5 0 0 0-9.8 0H2v2h13.1a5 5 0 0 0 9.8 0H30zm-10 4a3 3 0 1 1 3-3 3 3 0 0 1-3 3zM2 25h5.1a5 5 0 0 0 9.8 0H30v-2H16.9a5 5 0 0 0-9.8 0H2zm7-1a3 3 0 1 1 3 3 3 3 0 0 1-3-3z"/>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12"  height="18" width="24">
+        <path d="M8.05 2a2.5 2.5 0 0 1 4.9 0H16v1h-3.05a2.5 2.5 0 0 1-4.9 0H0V2h8.05zm2.45 2a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM3.05 9a2.5 2.5 0 0 1 4.9 0H16v1H7.95a2.5 2.5 0 0 1-4.9 0H0V9h3.05zm2.45 2a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z">
+      </svg>
+    </button>
+    <button id="open-info-btn" onclick="document.getElementById('info-panel').classList.remove('closed')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"  height="18" width="18">
+        <path d="M8 14.5a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM8 16A8 8 0 1 1 8 0a8 8 0 0 1 0 16z"></path>
+        <path d="M9 13H7V7h2z"></path><path d="M7 4a1 1 0 1 1 2 0 1 1 0 1 1-2 0"></path>
       </svg>
     </button>
   </header>
@@ -62,6 +68,56 @@
         <path fill="#ffffff" d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z"/>
       </svg>
     </button>
+  </div>
+
+  <div id="info-panel" class="slider closed">
+    <button id="close-info-btn" onclick="document.getElementById('info-panel').classList.add('closed')">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="28" width="28">
+        <path fill="#ffffff" d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z"/>
+      </svg>
+    </button>
+    <div class="slider-container">
+      <h2>Veremin</h2>
+      <p>
+        A video theremin that allows you to make beautiful
+        music just by waving your arms!
+      </p>
+
+      <h2>Usage</h2>
+      <p>
+        After the video loads, it will include an overlay with skeletal
+        and joint information detected by PoseNet. The overlay also
+        include two adjacent zones/boxes. Move your wrists within each
+        of the zones to make sounds.
+      </p>
+      <p>
+        Move your right hand/arm up and down (in the right zone) to
+        generate different notes.
+      </p>
+      <p>
+        Move your left hand/arm left and right (in the left zone) to adjust the velocity of the note.
+      </p>
+
+      <h2>Requirements</h2>
+      <p>
+        At a minimum, your browsers must allow access to a webcam and
+        support the <a href="https://caniuse.com/#feat=audio-api" target="blank">Web Audio API</a>.
+      </p>
+      <p>
+        If your browser supports the <a href="https://caniuse.com/#feat=midi" target="blank">Web MIDI API</a>,
+        you can connect a MIDI synthesizer to your computer or you can
+        download and run a software synthesizer such as <a href="http://notahat.com/simplesynth/" target="_blank">SimpleSynth</a>.
+      </p>
+      <p>
+        Depending on your browser, you may need to access this
+        application using the <strong>https</strong> protocol instead
+        of the http.
+      </p>
+      <p>
+        Check out the <a href="https://github.com/vabarbosa/veremin/blob/master/README.md" target="_blank">README</a>
+        for more information.
+      </p>
+    </div>
   </div>
 
   <footer>

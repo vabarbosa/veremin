@@ -45,7 +45,8 @@ header > span:first-of-type {
 }
 
 #open-cp-btn,
-#close-cp-btn {
+#close-cp-btn,
+#close-info-btn {
   background: none;
   border: 0px none;
   cursor: pointer;
@@ -56,15 +57,27 @@ header > span:first-of-type {
 
 #open-cp-btn {
   display: none;
+  right: 50px;
+  top: 15px;
+}
+
+#open-info-btn {
+  background: none;
+  border: 0px none;
+  cursor: pointer;
+  display: none;
+  position: absolute;
   right: 20px;
   top: 15px;
 }
 
-#open-cp-btn:hover svg {
+#open-cp-btn:hover svg,
+#open-info-btn:hover svg {
   fill: var(--teal-10);
 }
 
-body.ready #open-cp-btn {
+body.ready #open-cp-btn,
+body.ready #open-info-btn {
   display: initial;
 }
 
@@ -124,7 +137,8 @@ body.ready #wave {
   background-color: var(--teal-30);
 }
 
-#control-panel {
+#control-panel,
+#info-panel {
   position: fixed;
   right: 0;
   top: 0;
@@ -143,6 +157,33 @@ body.ready #wave {
 }
 .slider.closed {
 	left: 100vw;
+}
+
+.slider-container {
+  font-size: 0.75rem;
+  margin-top: 45px;
+  max-height: calc(100% - 100px);
+  overflow: auto;
+  padding: 0 5px 5px 10px;
+  width: 280px;
+}
+
+.slider-container h2:not(:first-of-type) {
+  margin-top: 20px;
+}
+
+.slider-container p {
+  margin: 5px 0 10px 5px;
+}
+
+.slider-container a,
+.slider-container a:link,
+.slider-container a:visited {
+  color: var(--primary-back);
+}
+
+.slider-container a:hover {
+  color: var(--secondary-back);
 }
 
 footer {
