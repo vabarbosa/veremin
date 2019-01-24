@@ -53,4 +53,4 @@ Below options are available for configuration in the control panel:
 | showSkeleton | `true` | Whether or not to show the skeletal information detected by PoseNet. |
 | showPoints | `true` | Whether or not to show the joint information detected by PoseNet. |
 | showZones | `true` | Whether or not to show the left and right activation zones. |
-| showWaveform | `true` | Whether or not to show the animate the sound waveform in the background. |
+| showWaveform | `true` | Whether or not to show the sound waveform in the background. |
