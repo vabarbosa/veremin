@@ -8,6 +8,9 @@ PoseNet is used to predict the location of your wrists within the video. The app
 
 Browsers must allow [access to the webcam](https://caniuse.com/#feat=stream) and support the [Web Audio API](https://caniuse.com/#feat=audio-api). Optionally, to integrate with a MIDI device the browser will need to support the [Web MIDI API](https://caniuse.com/#feat=midi) (e.g., Chrome browser version 43 or later). 
 
+## Watch the video
+
+[![](http://img.youtube.com/vi/ZCs8LBBZqas/0.jpg)](https://youtu.be/ZCs8LBBZqas)
 
 ## Featured tools & technologies
 
