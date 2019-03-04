@@ -86,9 +86,9 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   gui.add(guiState, 'noteDuration', 100, 2000, 50)
 
   // Selector for the vertical scale of the range
-  gui.add(guiState, 'notesRangeScale', 0.2, 2.5, 0.05)
+  gui.add(guiState, 'notesRangeScale', 0.6, 8, 0.05)
 
-  gui.add(guiState, 'notesRangeOffset', 0, 1, 0.05)
+  gui.add(guiState, 'notesRangeOffset', 0, 1, 0.01)
 
   const browserPreset = gui.addFolder('Browser')
 

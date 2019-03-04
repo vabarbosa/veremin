@@ -122,7 +122,7 @@ export function drawScale (x1, y1, x2, y2, interval = 50, ctx, range) {
   for (let j = 1; j < interval; j++) {
     const i = y1 + (s * j)
     if (i > range[0] && i < range[1]) {
-      drawSegment([i, x1 - 10], [i, x2], (j % Math.ceil(interval / 2) === 0 ? 'black' : 'red'), 1, ctx, 1)
+      drawSegment([i, x1 - 10], [i, x2], (j % 12 === 0 ? 'black' : 'red'), 1, ctx, 1)
     }
   }
   if (y2 <= range[1]) {
