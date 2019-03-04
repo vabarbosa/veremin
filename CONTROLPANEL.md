@@ -14,6 +14,8 @@ Below options are available for configuration in the control panel:
 | outputDevice | first detected MIDI output device (or browser if none) | List of available output device (i.e., browser plus detect MIDI output devices) |
 | chordIntervals | `minor0` | Chords/notes to select from when computing the note values as defined in [chord-interval.js](https://github.com/vabarbosa/veremin/blob/master/js/chord-intervals.js). |
 | noteDuration | `300` | Duration (in milliseconds) for how long a note is ON. |
+| notesRangeScale | `1` | Scale for the range of notes in respect to the vertical zone height (i.e., `1` equals entire zone height, `0.5` equals half the zone height, etc.). |
+| notesRangeOffset | `0` | Offset for the range of notes in response the the vertical zone bottom edge (i.e., `0` bottom of zone equals start of notes range, `0.5` bottom of zone equal half notes range) |
 
 ### Browser
 

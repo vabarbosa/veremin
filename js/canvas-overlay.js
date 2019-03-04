@@ -22,11 +22,11 @@ export function drawPoint (ctx, y, x, r, color) {
 /**
  * Draws a line on a canvas, i.e. a joint
  */
-export function drawSegment ([ay, ax], [by, bx], color, scale, ctx) {
+export function drawSegment ([ay, ax], [by, bx], color, scale, ctx, lw = lineWidth) {
   ctx.beginPath()
   ctx.moveTo(ax * scale, ay * scale)
   ctx.lineTo(bx * scale, by * scale)
-  ctx.lineWidth = lineWidth
+  ctx.lineWidth = lw
   ctx.strokeStyle = color
   ctx.stroke()
 }
@@ -109,4 +109,23 @@ export function drawWave (points, ctx) {
   ctx.lineCap = 'round'
   ctx.fillStyle = teal10
   ctx.fill()
+}
+
+/**
+ * Draw notes range scale onto a canvas
+ */
+export function drawScale (x1, y1, x2, y2, interval = 50, ctx, range) {
+  if (y1 >= range[0]) {
+    drawSegment([y1, x1 - 15], [y1, x2], 'black', 1, ctx, 1)
+  }
+  const s = (y2 - y1) / interval
+  for (let j = 1; j < interval; j++) {
+    const i = y1 + (s * j)
+    if (i > range[0] && i < range[1]) {
+      drawSegment([i, x1 - 10], [i, x2], (j % Math.ceil(interval / 2) === 0 ? 'black' : 'red'), 1, ctx, 1)
+    }
+  }
+  if (y2 <= range[1]) {
+    drawSegment([y2, x1 - 15], [y2, x2], 'black', 1, ctx, 1)
+  }
 }

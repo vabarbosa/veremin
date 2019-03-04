@@ -13,6 +13,8 @@ export let guiState = {
   outputDevice: 'browser',
   chordIntervals: 'default',
   noteDuration: 300,
+  notesRangeScale: 1,
+  notesRangeOffset: 0,
   browser: {
     preset: 'default'
   },
@@ -82,6 +84,11 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
 
   // Selector for the duration (in milliseconds) for how long a note is ON
   gui.add(guiState, 'noteDuration', 100, 2000, 50)
+
+  // Selector for the vertical scale of the range
+  gui.add(guiState, 'notesRangeScale', 0.2, 2.5, 0.05)
+
+  gui.add(guiState, 'notesRangeOffset', 0, 1, 0.05)
 
   const browserPreset = gui.addFolder('Browser')
 

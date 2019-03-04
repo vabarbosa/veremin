@@ -1,7 +1,6 @@
 /* global Tone */
 
 import { presets } from './tonejs-presets.js'
-import { chords } from './chord-intervals.js'
 
 const CHANNEL = 1 // channels 1-16
 const NOTEOFF = (0x8 << 4) + (CHANNEL - 1) // equals 128 (with channel = 1)
@@ -209,16 +208,11 @@ export function setPreferredDevice (name) {
  * @param {Number} volume - the volume in range (0 to 1) to play the tone at
  * @param {Number} duration - how long (in ms) to play the tone
  */
-export function playNote (value, volume, duration = 300, chordsInterval) {
+export function playNote (value, volume, duration = 300, chordsArray) {
   if (value && volume) {
     // keep value & volume within range (0 - 1)
     value = value < 0 ? 0 : (value > 1 ? 1 : value)
     volume = volume < 0 ? 0 : (volume > 1 ? 1 : volume)
-
-    let chordsArray = null
-    if (chordsInterval && chordsInterval !== 'default' && chords.hasOwnProperty(chordsInterval)) {
-      chordsArray = chords[chordsInterval]
-    }
 
     let midiNotes = computeNote(value, 0, 1, chordsArray)
     let v = volume

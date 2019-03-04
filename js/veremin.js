@@ -2,8 +2,9 @@
 
 import { loadVideo, preferredVideoSize } from './camera-util.js'
 import { playNote, getMidiDevices, getAnalyzerValue } from './audio-controller.js'
-import { drawKeypoints, drawSkeleton, drawBox, drawWave } from './canvas-overlay.js'
+import { drawKeypoints, drawSkeleton, drawBox, drawWave, drawScale } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
+import { chords } from './chord-intervals.js'
 
 const isMobile = function () {
   const isAndroid = /Android/i.test(navigator.userAgent)
@@ -118,6 +119,15 @@ const detectPoseInRealTime = function (video) {
 
     canvasCtx.clearRect(0, 0, VIDEOWIDTH, VIDEOHEIGHT)
 
+    const topOffset = ZONEHEIGHT - (ZONEHEIGHT * guiState.notesRangeScale) + ZONEOFFSET
+    const notesOffset = (ZONEHEIGHT - topOffset) * guiState.notesRangeOffset
+
+    const chordsInterval = guiState.chordIntervals === 'default' ? null : guiState.chordIntervals
+    let chordsArray = []
+    if (chordsInterval && chordsInterval !== 'default' && chords.hasOwnProperty(chordsInterval)) {
+      chordsArray = chords[chordsInterval]
+    }
+
     if (guiState.canvas.showVideo) {
       canvasCtx.save()
       canvasCtx.scale(-1, 1)
@@ -131,6 +141,15 @@ const detectPoseInRealTime = function (video) {
       drawBox(ZONEOFFSET, ZONEOFFSET, ZONEWIDTH, ZONEHEIGHT, canvasCtx)
       // draw right zone
       drawBox(ZONEWIDTH, ZONEOFFSET, VIDEOWIDTH - ZONEOFFSET, ZONEHEIGHT, canvasCtx)
+      // draw notes range scale
+      drawScale(
+        (VIDEOWIDTH - ZONEOFFSET),
+        (topOffset + notesOffset),
+        (VIDEOWIDTH - ZONEOFFSET),
+        (ZONEHEIGHT + notesOffset),
+        (chordsArray.length || 100),
+        canvasCtx,
+        [ZONEOFFSET, ZONEHEIGHT])
     }
 
     // For each pose (i.e. person) detected in an image, loop through the poses and
@@ -143,14 +162,14 @@ const detectPoseInRealTime = function (video) {
 
         if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
           // Normalize keypoints to values between 0 and 1 (horizontally & vertically)
-          const position = normalizePositions(leftWrist, rightWrist)
+          const position = normalizePositions(leftWrist, rightWrist, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
 
           if (position.right.vertical > 0 && position.left.horizontal > 0) {
             playNote(
               position.right.vertical, // note
               position.left.horizontal, // volume
               guiState.noteDuration,
-              guiState.chordIntervals === 'default' ? null : guiState.chordIntervals
+              chordsArray
             )
           } else {
             playNote(0, 0)
@@ -184,16 +203,17 @@ const detectPoseInRealTime = function (video) {
  *
  * @param {Object} leftWrist - posenet 'leftWrist' keypoints (corresponds to user's right hand)
  * @param {Object} rightWrist - posenet 'rightWrist' keypoints (corresponds to user's left hand)
+ * @param {Number} notesTopOffset - top edge (max position) for computing vertical notes
  */
-const normalizePositions = function (leftWrist, rightWrist) {
+const normalizePositions = function (leftWrist, rightWrist, topOffset = ZONEOFFSET, bottomOffset = ZONEHEIGHT) {
   const leftZone = rightWrist.position
   const rightZone = leftWrist.position
 
   const leftEdge = ZONEOFFSET
   const verticalSplit = ZONEWIDTH
   const rightEdge = VIDEOWIDTH - ZONEOFFSET
-  const topEdge = ZONEOFFSET
-  const bottomEdge = ZONEHEIGHT
+  const topEdge = topOffset
+  const bottomEdge = bottomOffset
 
   let position = {
     right: {
@@ -209,14 +229,14 @@ const normalizePositions = function (leftWrist, rightWrist) {
   if (rightZone.x >= verticalSplit && rightZone.x <= rightEdge) {
     position.right.horizontal = computePercentage(rightZone.x, verticalSplit, rightEdge)
   }
-  if (rightZone.y <= bottomEdge && rightZone.y >= topEdge) {
+  if (rightZone.y <= ZONEHEIGHT && rightZone.y >= ZONEOFFSET) {
     position.right.vertical = computePercentage(rightZone.y, bottomEdge, topEdge)
   }
   if (leftZone.x >= leftEdge && leftZone.x <= verticalSplit) {
     position.left.horizontal = computePercentage(leftZone.x, verticalSplit, leftEdge)
   }
-  if (leftZone.y <= bottomEdge && leftZone.y >= topEdge) {
-    position.left.vertical = computePercentage(leftZone.y, bottomEdge, topEdge)
+  if (leftZone.y <= ZONEHEIGHT && leftZone.y >= ZONEOFFSET) {
+    position.left.vertical = computePercentage(leftZone.y, ZONEHEIGHT, ZONEOFFSET)
   }
 
   return position
