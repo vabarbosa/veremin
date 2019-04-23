@@ -28,7 +28,7 @@ export let guiState = {
     minPartConfidence: 0.5
   },
   multiPoseDetection: {
-    maxPoseDetections: 5,
+    maxPoseDetections: 1,
     minPoseConfidence: 0.15,
     minPartConfidence: 0.1,
     nmsRadius: 30.0
@@ -135,7 +135,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   let multi = gui.addFolder('Multi Pose Detection')
   multi.add(guiState.multiPoseDetection, 'maxPoseDetections')
     .min(1)
-    .max(20)
+    .max(10)
     .step(1)
 
   multi.add(guiState.multiPoseDetection, 'minPoseConfidence', 0.0, 1.0)

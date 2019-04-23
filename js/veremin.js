@@ -152,38 +152,10 @@ const detectPoseInRealTime = function (video) {
         [ZONEOFFSET, ZONEHEIGHT])
     }
 
-    // For each pose (i.e. person) detected in an image, loop through the poses and
-    // draw the resulting skeleton and keypoints if over certain confidence scores
-    // and send data to play corresponding note
+    // Loop through each pose (i.e. person) detected
     poses.forEach(({ score, keypoints }) => {
       if (score >= minPoseConfidence) {
-        const leftWrist = keypoints[LEFTWRIST]
-        const rightWrist = keypoints[RIGHTWRIST]
-
-        if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
-          // Normalize keypoints to values between 0 and 1 (horizontally & vertically)
-          const position = normalizePositions(leftWrist, rightWrist, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
-
-          if (position.right.vertical > 0 && position.left.horizontal > 0) {
-            playNote(
-              position.right.vertical, // note
-              position.left.horizontal, // volume
-              guiState.noteDuration,
-              chordsArray
-            )
-          } else {
-            playNote(0, 0)
-          }
-        } else {
-          playNote(0, 0)
-        }
-
-        if (guiState.canvas.showPoints) {
-          drawKeypoints(keypoints, minPartConfidence, canvasCtx)
-        }
-        if (guiState.canvas.showSkeleton) {
-          drawSkeleton(keypoints, minPartConfidence, canvasCtx)
-        }
+        processPose(score, keypoints, minPartConfidence, topOffset, notesOffset, chordsArray, canvasCtx)
       }
     })
 
@@ -196,6 +168,39 @@ const detectPoseInRealTime = function (video) {
   }
 
   poseDetectionFrame()
+}
+
+/**
+ * Draw the resulting skeleton and keypoints and send data to play corresponding note
+ */
+const processPose = function (score, keypoints, minPartConfidence, topOffset, notesOffset, chordsArray, canvasCtx) {
+  const leftWrist = keypoints[LEFTWRIST]
+  const rightWrist = keypoints[RIGHTWRIST]
+
+  if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
+    // Normalize keypoints to values between 0 and 1 (horizontally & vertically)
+    const position = normalizePositions(leftWrist, rightWrist, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
+
+    if (position.right.vertical > 0 && position.left.horizontal > 0) {
+      playNote(
+        position.right.vertical, // note
+        position.left.horizontal, // volume
+        guiState.noteDuration,
+        chordsArray
+      )
+    } else {
+      playNote(0, 0)
+    }
+  } else {
+    playNote(0, 0)
+  }
+
+  if (guiState.canvas.showPoints) {
+    drawKeypoints(keypoints, minPartConfidence, canvasCtx)
+  }
+  if (guiState.canvas.showSkeleton) {
+    drawSkeleton(keypoints, minPartConfidence, canvasCtx)
+  }
 }
 
 /**
