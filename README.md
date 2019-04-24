@@ -25,7 +25,7 @@ Browsers must allow [access to the webcam](https://caniuse.com/#feat=stream) and
 
 To see the Veremin in action without installing anything, simply visit:
 
-https://veremin.mybluemix.net
+https://ibm.biz/veremin
 
 For best results, you may want to use the Chrome browser and have a MIDI synthesizer (hardware or software) connected. See the [Using the app](https://github.com/vabarbosa/veremin#using-the-app) section below for more information.
 
