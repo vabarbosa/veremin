@@ -200,6 +200,8 @@ body.ready #wave {
 }
 #qr-panel img {
   margin-top: 40px;
+  max-height: calc(100vh - 180px);
+  max-width: calc(100vw - 20px);
 }
 
 footer {

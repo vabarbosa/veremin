@@ -4,4 +4,4 @@ applications:
   name: video theremin
   random-route: true
   memory: 64M
-  stack: cflinuxfs2
+  stack: cflinuxfs3
