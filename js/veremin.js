@@ -1,8 +1,8 @@
-/* global posenet, requestAnimationFrame */
+/* global posenet, requestAnimationFrame, performance */
 
 import { loadVideo, preferredVideoSize } from './camera-util.js'
 import { playNote, getMidiDevices, getAnalyzerValue } from './audio-controller.js'
-import { drawKeypoints, drawSkeleton, drawBox, drawWave, drawScale } from './canvas-overlay.js'
+import { drawKeypoints, drawSkeleton, drawBox, drawWave, drawScale, drawText } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
 import { chords } from './chord-intervals.js'
 
@@ -25,6 +25,21 @@ const LEFTWRIST = 9
 const RIGHTWRIST = 10
 
 let posenetModel = null
+
+let fpsTime = 0
+let fpsFrames = 0
+let fps = '--'
+const computeFPS = function () {
+  fpsFrames++
+  let currentTime = (performance || Date).now()
+
+  if (currentTime >= fpsTime + 1000) {
+    fps = Math.round((fpsFrames * 1000) / (currentTime - fpsTime))
+    fpsTime = currentTime
+    fpsFrames = 0
+  }
+  return fps
+}
 
 const setUserMedia = function () {
   navigator.getUserMedia = navigator.getUserMedia ||
@@ -162,6 +177,11 @@ const detectPoseInRealTime = function (video) {
     if (guiState.canvas.showWaveform) {
       const value = getAnalyzerValue()
       drawWave(value, waveCtx)
+    }
+
+    // update frames per second
+    if (guiState.canvas.showFPS) {
+      drawText(`${computeFPS()} FPS`, (VIDEOWIDTH - ZONEOFFSET), (VIDEOHEIGHT - ZONEOFFSET), 'right', canvasCtx)
     }
 
     requestAnimationFrame(poseDetectionFrame)

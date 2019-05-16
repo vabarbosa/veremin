@@ -129,3 +129,13 @@ export function drawScale (x1, y1, x2, y2, interval = 50, ctx, range) {
     drawSegment([y2, x1 - 15], [y2, x2], 'black', 1, ctx, 1)
   }
 }
+
+/**
+ * Draw text on the canvas
+ */
+export function drawText (text, x, y, align = 'start', ctx, color = 'red') {
+  ctx.font = '16px Arial'
+  ctx.textAlign = align
+  ctx.fillStyle = color
+  ctx.fillText(text, x, y)
+}

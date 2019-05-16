@@ -38,7 +38,8 @@ export let guiState = {
     showSkeleton: true,
     showPoints: true,
     showZones: true,
-    showWaveform: true
+    showWaveform: true,
+    showFPS: false
   }
 }
 
@@ -155,6 +156,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   canvas.add(guiState.canvas, 'showPoints')
   canvas.add(guiState.canvas, 'showZones')
   canvas.add(guiState.canvas, 'showWaveform')
+  canvas.add(guiState.canvas, 'showFPS')
 
   architectureController.onChange(function (architecture) {
     guiState.changeToArchitecture = architecture
