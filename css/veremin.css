@@ -44,48 +44,45 @@ header > span:first-of-type {
   font-size: xx-large;
 }
 
-#open-cp-btn,
+#btn-grp {
+  display: none;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  left: 12px;
+  text-align: right;
+}
+
+#btn-grp > button,
 #close-cp-btn,
 #close-info-btn,
+#close-qr-btn,
 #help-cp-link {
   background: none;
   border: 0px none;
   cursor: pointer;
+}
+
+#help-cp-link {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+
+#close-cp-btn,
+#close-info-btn,
+#close-qr-btn {
   position: absolute;
   right: 10px;
   top: 10px;
 }
 
-#help-cp-link {
-  left: 10px;
-  right: initial;
-  top: 10px;
-}
-
-#open-cp-btn {
-  display: none;
-  right: 50px;
-  top: 15px;
-}
-
-#open-info-btn {
-  background: none;
-  border: 0px none;
-  cursor: pointer;
-  display: none;
-  position: absolute;
-  right: 20px;
-  top: 15px;
-}
-
-#open-cp-btn:hover svg,
-#open-info-btn:hover svg {
+#btn-grp > button:hover svg {
   fill: var(--teal-10);
 }
 
-body.ready #open-cp-btn,
-body.ready #open-info-btn {
-  display: initial;
+body.ready #btn-grp {
+  display: inline-block;
 }
 
 .v-info {
@@ -145,7 +142,8 @@ body.ready #wave {
 }
 
 #control-panel,
-#info-panel {
+#info-panel,
+#qr-panel {
   position: fixed;
   right: 0;
   top: 0;
@@ -162,8 +160,11 @@ body.ready #wave {
 	transition-duration: .5s;
 	transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
+#qr-panel.slider {
+  left: 0;
+}
 .slider.closed {
-	left: 100vw;
+	left: 100vw !important;
 }
 
 .slider-container {
@@ -191,6 +192,14 @@ body.ready #wave {
 
 .slider-container a:hover {
   color: var(--secondary-back);
+}
+
+#qr-panel .slider-container {
+  text-align: center;
+  width: initial;
+}
+#qr-panel img {
+  margin-top: 40px;
 }
 
 footer {
