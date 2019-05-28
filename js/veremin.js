@@ -330,9 +330,9 @@ const initEnvInfo = function () {
   updateEnvInfo('user-agent', navigator.userAgent, 'User-Agent')
   updateEnvInfo('is-mobile', isMobile(), 'Mobile device')
   updateEnvInfo('tfjs-version', (tf ? tf.version.tfjs : 'Not available'), 'TensorFlow.js version')
-  updateEnvInfo('media-devices', (navigator.hasOwnProperty('mediaDevices') && navigator.mediaDevices.hasOwnProperty('getUserMedia')), 'Web camera access')
-  updateEnvInfo('web-audio', (window.hasOwnProperty('AudioContext') || window.hasOwnProperty('webkitAudioContext')), 'Web Audio API support')
-  updateEnvInfo('web-midi', navigator.hasOwnProperty('requestMIDIAccess'), 'Web MIDI API support')
+  updateEnvInfo('media-devices', !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia), 'Web camera access')
+  updateEnvInfo('web-audio', !!(window.AudioContext || window.webkitAudioContext), 'Web Audio API support')
+  updateEnvInfo('web-midi', !!(navigator.requestMIDIAccess), 'Web MIDI API support')
 }
 
 // init the app
