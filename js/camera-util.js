@@ -68,8 +68,8 @@ export const preferredVideoSize = function (video, mobile) {
     let vh = 600
 
     if (video) {
-      vw = video.videoWidth
-      vh = video.videoHeight
+      vw = video.videoWidth || vw
+      vh = video.videoHeight || vh
     }
 
     const videoRatio = vw / vh
@@ -89,6 +89,6 @@ export const preferredVideoSize = function (video, mobile) {
     }
   }
 
-  // console.log(size)
+  window.updateEnvInfo('video-size', `${Math.floor(size.width)}x${Math.floor(size.height)}`, 'Video size')
   return size
 }

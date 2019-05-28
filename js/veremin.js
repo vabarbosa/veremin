@@ -1,4 +1,4 @@
-/* global posenet, requestAnimationFrame, performance */
+/* global tf, posenet, requestAnimationFrame, performance, updateEnvInfo */
 
 import { loadVideo, preferredVideoSize } from './camera-util.js'
 import { playNote, getMidiDevices, getAnalyzerValue } from './audio-controller.js'
@@ -39,12 +39,6 @@ const computeFPS = function () {
     fpsFrames = 0
   }
   return fps
-}
-
-const setUserMedia = function () {
-  navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia
 }
 
 const resetVideoCanvasSize = function (video, canvas) {
@@ -287,6 +281,7 @@ const computePercentage = function (value, low, high) {
  * available camera devices, and setting off the detectPoseInRealTime function.
  */
 const bindPage = async function () {
+  window.onresize = resize
   posenetModel = await posenet.load(0.75) // load the PoseNet with architecture 0.75
 
   const body = document.getElementsByTagName('body')[0]
@@ -301,20 +296,51 @@ const bindPage = async function () {
     detectPoseInRealTime(video)
   } catch (e) {
     body.className = 'error'
-    const info = document.getElementById('info')
-    info.textContent = 'Browser does not support video capture or this device does not have a camera'
+    const info = document.getElementById('msg')
+    info.textContent = 'Unable to access camera or video capture is not supported'
+    updateEnvInfo('Error', e)
     throw e
   }
+}
 
-  window.onresize = resize
+// update environment info
+window.updateEnvInfo = function (id, value, label) {
+  const param = document.getElementById(id)
+  if (param) {
+    param.textContent = value
+  } else {
+    const dt = document.createElement('dt')
+    dt.textContent = label || id
+    const dd = document.createElement('dd')
+    dd.id = id
+    dd.textContent = value
+    const dlist = document.getElementById('env-list')
+    if (id.toLowerCase() === 'error') {
+      dt.className = 'error'
+      dd.className = 'error'
+    }
+    dlist.appendChild(dt)
+    dlist.appendChild(dd)
+  }
+}
+
+// init environment info
+const initEnvInfo = function () {
+  updateEnvInfo('location', window.location, 'Location')
+  updateEnvInfo('user-agent', navigator.userAgent, 'User-Agent')
+  updateEnvInfo('is-mobile', isMobile(), 'Mobile device')
+  updateEnvInfo('tfjs-version', (tf ? tf.version.tfjs : 'Not available'), 'TensorFlow.js version')
+  updateEnvInfo('media-devices', (navigator.hasOwnProperty('mediaDevices') && navigator.mediaDevices.hasOwnProperty('getUserMedia')), 'Web camera access')
+  updateEnvInfo('web-audio', (window.hasOwnProperty('AudioContext') || window.hasOwnProperty('webkitAudioContext')), 'Web Audio API support')
+  updateEnvInfo('web-midi', navigator.hasOwnProperty('requestMIDIAccess'), 'Web MIDI API support')
 }
 
 // init the app
 const init = function () {
+  initEnvInfo()
   const waveCtx = document.getElementById('wave').getContext('2d')
   drawWave([], waveCtx)
 
-  setUserMedia()
   getMidiDevices().then(bindPage)
 }
 

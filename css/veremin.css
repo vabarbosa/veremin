@@ -57,7 +57,10 @@ header > span:first-of-type {
 #close-cp-btn,
 #close-info-btn,
 #close-qr-btn,
-#help-cp-link {
+#help-cp-link,
+#open-env-btn,
+#close-env-btn,
+#open-env-link {
   background: none;
   border: 0px none;
   cursor: pointer;
@@ -69,9 +72,20 @@ header > span:first-of-type {
   top: 10px;
 }
 
+#open-env-link {
+  color: var(--primary-back);
+  text-decoration: underline;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+}
+#open-env-link:hover {
+  color: var(--secondary-back);
+}
+
 #close-cp-btn,
 #close-info-btn,
-#close-qr-btn {
+#close-qr-btn,
+#close-env-btn {
   position: absolute;
   right: 10px;
   top: 10px;
@@ -85,7 +99,7 @@ body.ready #btn-grp {
   display: inline-block;
 }
 
-.v-info {
+.v-msg {
   font-size: 28px;
   position: fixed;
   top: calc(var(--tall) - 28px);
@@ -93,7 +107,16 @@ body.ready #btn-grp {
   right: 0;
 }
 
-.v-info,
+.v-msg button {
+  display: none;
+  vertical-align: middle;
+}
+
+.v-msg div {
+  display: inline-block;
+}
+
+.v-msg,
 .v-wrapper {
   text-align: center;
 }
@@ -116,7 +139,11 @@ body.error main {
   display: none;
 }
 
-body.ready .v-info {
+body.error .v-msg button {
+  display: inline-block;
+}
+
+body.ready .v-msg {
   display: none;
 }
 
@@ -143,7 +170,8 @@ body.ready #wave {
 
 #control-panel,
 #info-panel,
-#qr-panel {
+#qr-panel,
+#env-panel {
   position: fixed;
   right: 0;
   top: 0;
@@ -160,7 +188,8 @@ body.ready #wave {
 	transition-duration: .5s;
 	transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
-#qr-panel.slider {
+#qr-panel.slider,
+#env-panel.slider {
   left: 0;
 }
 .slider.closed {
@@ -202,6 +231,29 @@ body.ready #wave {
   margin-top: 40px;
   max-height: calc(100vh - 180px);
   max-width: calc(100vw - 20px);
+}
+
+#env-panel .slider-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 600px;
+  width: calc(100vw - 25px);
+}
+#env-panel dt {
+  margin-top: 10px;
+  font-weight: 600;
+  border-top: #444 1px solid;
+}
+#env-panel dd {
+  text-align: right;
+}
+#env-list {
+  margin-bottom: 30px;
+  margin-top: 30px;
+}
+#env-list .error {
+  color: lightpink;
+  text-align: left !important;
 }
 
 footer {
