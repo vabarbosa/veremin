@@ -54,12 +54,9 @@ header > span:first-of-type {
 }
 
 #btn-grp > button,
-#close-cp-btn,
-#close-info-btn,
-#close-qr-btn,
+.close-btn,
 #help-cp-link,
 #open-env-btn,
-#close-env-btn,
 #open-env-link {
   background: none;
   border: 0px none;
@@ -82,16 +79,14 @@ header > span:first-of-type {
   color: var(--secondary-back);
 }
 
-#close-cp-btn,
-#close-info-btn,
-#close-qr-btn,
-#close-env-btn {
+.close-btn {
   position: absolute;
   right: 10px;
   top: 10px;
 }
 
-#btn-grp > button:hover svg {
+#btn-grp > button:hover svg,
+#open-env-btn:hover svg {
   fill: var(--teal-10);
 }
 
@@ -168,19 +163,14 @@ body.ready #wave {
   background-color: var(--teal-30);
 }
 
-#control-panel,
-#info-panel,
-#qr-panel,
-#env-panel {
+.v-slider {
   position: fixed;
   right: 0;
   top: 0;
   bottom: 0;
   background-color: #000;
   color: #fff;
-}
 
-.slider {
   overflow-x: hidden;
   left: calc(100vw - 300px);
 
@@ -188,15 +178,15 @@ body.ready #wave {
 	transition-duration: .5s;
 	transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 }
-#qr-panel.slider,
-#env-panel.slider {
+#qr-panel.v-slider,
+#env-panel.v-slider {
   left: 0;
 }
-.slider.closed {
+.v-slider.closed {
 	left: 100vw !important;
 }
 
-.slider-container {
+.v-slider-container {
   font-size: 0.75rem;
   margin-top: 45px;
   max-height: calc(100% - 100px);
@@ -205,25 +195,25 @@ body.ready #wave {
   width: 280px;
 }
 
-.slider-container h2:not(:first-of-type) {
+.v-slider-container h2:not(:first-of-type) {
   margin-top: 20px;
 }
 
-.slider-container p {
+.v-slider-container p {
   margin: 5px 0 10px 5px;
 }
 
-.slider-container a,
-.slider-container a:link,
-.slider-container a:visited {
+.v-slider-container a,
+.v-slider-container a:link,
+.v-slider-container a:visited {
   color: var(--primary-back);
 }
 
-.slider-container a:hover {
+.v-slider-container a:hover {
   color: var(--secondary-back);
 }
 
-#qr-panel .slider-container {
+#qr-panel .v-slider-container {
   text-align: center;
   width: initial;
 }
@@ -233,7 +223,7 @@ body.ready #wave {
   max-width: calc(100vw - 20px);
 }
 
-#env-panel .slider-container {
+#env-panel .v-slider-container {
   margin-left: auto;
   margin-right: auto;
   max-width: 600px;
@@ -279,7 +269,7 @@ footer {
     font-size: large;
   }
 
-  .slider {
+  .v-slider {
     left: 0;
   }
 }

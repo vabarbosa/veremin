@@ -77,39 +77,42 @@
 
   <canvas id="wave"></canvas>
 
-  <div id="qr-panel" class="slider closed">
-    <button id="close-qr-btn" onclick="document.getElementById('qr-panel').classList.add('closed')"  title="close qr code">
+  <div id="qr-panel" class="v-slider closed">
+    <button id="close-qr-btn" class="close-btn" title="close qr code"
+      onclick="document.getElementById('qr-panel').classList.add('closed')">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="28" width="28">
         <path fill="#ffffff" d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z"/>
       </svg>
     </button>
-    <div class="slider-container">
+    <div class="v-slider-container">
       <h1>ibm.biz/veremin</h1>
       <img src="img/veremin-qr.png" alt="veremin qr code" />
     </div>
   </div>
 
-  <div id="control-panel" class="slider closed">
+  <div id="control-panel" class="v-slider closed">
     <a id="help-cp-link" href="https://github.com/vabarbosa/veremin/blob/master/CONTROLPANEL.md" target="blank" title="control panel guide">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" height="24" width="24">
         <path fill="#20d5d2" d="M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14zm0 1a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"></path>
         <path fill="#20d5d2" d="M10.5 10.5V12h-1V9.5h1a1.5 1.5 0 0 0 0-3h-1A1.5 1.5 0 0 0 8 8H7a2.5 2.5 0 0 1 2.5-2.5h1a2.5 2.5 0 1 1 0 5zM9 14a1 1 0 1 1 2 0 1 1 0 1 1-2 0"></path>
       </svg>
     </a>
-    <button id="close-cp-btn" onclick="document.getElementById('control-panel').classList.add('closed')" title="close control panel">
+    <button id="close-cp-btn" class="close-btn" title="close control panel"
+      onclick="document.getElementById('control-panel').classList.add('closed')">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="28" width="28">
         <path fill="#ffffff" d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z"/>
       </svg>
     </button>
   </div>
 
-  <div id="info-panel" class="slider closed">
-    <button id="close-info-btn" onclick="document.getElementById('info-panel').classList.add('closed')"  title="close info">
+  <div id="info-panel" class="v-slider closed">
+    <button id="close-info-btn" class="close-btn" title="close info"
+      onclick="document.getElementById('info-panel').classList.add('closed')">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="28" width="28">
         <path fill="#ffffff" d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z"/>
       </svg>
     </button>
-    <div class="slider-container">
+    <div class="v-slider-container">
       <h2>Veremin</h2>
       <p>
         A video theremin that allows you to make beautiful
@@ -160,13 +163,14 @@
     </div>
   </div>
 
-  <div id="env-panel" class="slider closed">
-    <button id="close-env-btn" onclick="document.getElementById('env-panel').classList.add('closed')"  title="close environment info">
+  <div id="env-panel" class="v-slider closed">
+    <button id="close-env-btn" class="close-btn" title="close environment info"
+      onclick="document.getElementById('env-panel').classList.add('closed')">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" height="28" width="28">
         <path fill="#ffffff" d="M24 9.4L22.6 8 16 14.6 9.4 8 8 9.4l6.6 6.6L8 22.6 9.4 24l6.6-6.6 6.6 6.6 1.4-1.4-6.6-6.6L24 9.4z"/>
       </svg>
     </button>
-    <div class="slider-container">
+    <div class="v-slider-container">
       <h2>Environment</h2>
       <dl id="env-list"> </dl>
     </div>
