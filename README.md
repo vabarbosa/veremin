@@ -35,7 +35,7 @@ For best results, you may want to use the Chrome browser and have a MIDI synthes
 Follow one of these steps to deploy your own instance of Veremin.
 
 - [Deploy to IBM Cloud](https://github.com/vabarbosa/veremin#deploy-to-ibm-cloud)
-- [Run locally](https://github.com/vabarbosa/veremin#deploy-to-ibm-cloud)
+- [Run locally](https://github.com/vabarbosa/veremin#run-locally)
 
 ### Deploy to IBM Cloud
 

@@ -52,7 +52,7 @@ const playUsingMidiDevice = function (midiNote, midiVelocity, duration) {
   // console.log(`NOTEON('${midiNote},${midiVelocity}')`)
   selectedMidiDevice.send([NOTEON, midiNote, midiVelocity])
 
-  playUsingWebAudio(midiNote, midiVelocity / 127, duration, true)
+  // playUsingWebAudio(midiNote, midiVelocity / 127, duration, true)
 
   setTimeout(function () {
     // console.log(`NOTEOFF('${midiNote},${midiVelocity}')`)

@@ -19,9 +19,8 @@ export let guiState = {
     preset: 'default'
   },
   input: {
-    mobileNetArchitecture: '0.75',
-    outputStride: 16,
-    imageScaleFactor: 0.5
+    architecture: 'MobileNetV1',
+    outputStride: 16
   },
   singlePoseDetection: {
     minPoseConfidence: 0.1,
@@ -106,24 +105,17 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   // The input parameters have the most effect on accuracy and speed of the network
   let input = gui.addFolder('Input')
 
-  // Architecture: there are a few PoseNet models varying in size and accuracy.
-  // 1.01 is the largest, but will be the slowest. 0.50 is the fastest, but least accurate.
-  guiState.mobileNetArchitecture = mobile ? '0.50' : '0.75'
+  // Architecture
   const architectureController = input.add(
     guiState.input,
-    'mobileNetArchitecture',
-    ['1.01', '1.00', '0.75', '0.50']
+    'architecture',
+    ['MobileNetV1', 'ResNet50']
   )
 
   // Output stride: affects the height and width of the layers in the neural network.
   // The lower the value of the output stride the higher the accuracy but slower the speed,
   // the higher the value the faster the speed but lower the accuracy.
   input.add(guiState.input, 'outputStride', [8, 16, 32])
-
-  // Image scale factor: What to scale the image by before feeding it through the network.
-  input.add(guiState.input, 'imageScaleFactor')
-    .min(0.2)
-    .max(1.0)
 
   let single = gui.addFolder('Single Pose Detection')
 

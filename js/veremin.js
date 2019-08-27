@@ -82,16 +82,17 @@ const detectPoseInRealTime = function (video) {
       // Important to purge variables and free up GPU memory
       posenetModel.dispose()
 
-      // Load the PoseNet model weights for either the 0.50, 0.75, 1.00, or 1.01 version
-      posenetModel = await posenet.load(+guiState.changeToArchitecture)
+      // Load the PoseNet model weights for changed architecture
+      posenetModel = await posenet.load({
+        architecture: guiState.changeToArchitecture,
+        outputStride: guiState.outputStride,
+        inputResolution: guiState.inputResolution,
+        multiplier: guiState.multiplier
+      })
 
+      guiState.architecture = guiState.changeToArchitecture
       guiState.changeToArchitecture = null
     }
-
-    // Scale an image down to a certain factor.
-    // Too large of an image will slow down the GPU
-    const imageScaleFactor = guiState.input.imageScaleFactor
-    const outputStride = +guiState.input.outputStride
 
     let poses = []
     let minPoseConfidence
@@ -100,10 +101,10 @@ const detectPoseInRealTime = function (video) {
     switch (guiState.algorithm) {
       case 'single-pose':
         const pose = await posenetModel.estimateSinglePose(
-          video,
-          imageScaleFactor,
-          flipHorizontal,
-          outputStride
+          video, {
+            flipHorizontal: flipHorizontal,
+            decodingMethod: 'single-person'
+          }
         )
         poses.push(pose)
 
@@ -112,13 +113,13 @@ const detectPoseInRealTime = function (video) {
         break
       case 'multi-pose':
         poses = await posenetModel.estimateMultiplePoses(
-          video,
-          imageScaleFactor,
-          flipHorizontal,
-          outputStride,
-          guiState.multiPoseDetection.maxPoseDetections,
-          guiState.multiPoseDetection.minPartConfidence,
-          guiState.multiPoseDetection.nmsRadius
+          video, {
+            flipHorizontal: flipHorizontal,
+            decodingMethod: 'multi-person',
+            maxDetections: guiState.multiPoseDetection.maxPoseDetections,
+            scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
+            nmsRadius: guiState.multiPoseDetection.nmsRadius
+          }
         )
 
         minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence
@@ -225,8 +226,8 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
  * @param {Number} notesTopOffset - top edge (max position) for computing vertical notes
  */
 const normalizePositions = function (leftWrist, rightWrist, topOffset = ZONEOFFSET, bottomOffset = ZONEHEIGHT) {
-  const leftZone = rightWrist.position
-  const rightZone = leftWrist.position
+  const leftZone = leftWrist.position
+  const rightZone = rightWrist.position
 
   const leftEdge = ZONEOFFSET
   const verticalSplit = ZONEWIDTH
@@ -282,7 +283,7 @@ const computePercentage = function (value, low, high) {
  */
 const bindPage = async function () {
   window.onresize = resize
-  posenetModel = await posenet.load(0.75) // load the PoseNet with architecture 0.75
+  posenetModel = await posenet.load()
 
   const body = document.getElementsByTagName('body')[0]
 
@@ -293,6 +294,7 @@ const bindPage = async function () {
     video = await loadVideo('video', mobile)
     await setupGui([], mobile)
     body.className = 'ready'
+    resize()
     detectPoseInRealTime(video)
   } catch (e) {
     body.className = 'error'
