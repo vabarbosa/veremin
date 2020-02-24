@@ -134,9 +134,10 @@ Click on the Controls icon (top right) to open the control panel. In the control
 
 ## Links
 
- - [IBM Cloud](https://console.bluemix.net/)
- - [Getting started with the IBM Cloud CLI](https://console.bluemix.net/docs/cli/index.html#overview)
- - [Prepare the app for deployment - IBM Cloud](https://console.bluemix.net/docs/runtimes/nodejs/getting-started.html#prepare)
+ - [Veremin — A Browser-based Video Theremin](https://medium.com/codait/veremin-a-browser-based-video-theremin-1548b63200c)
  - [Real-time Human Pose Estimation in the Browser with TensorFlow.js](https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5)
  - [Playing with MIDI in JavaScript](https://medium.com/swinginc/playing-with-midi-in-javascript-b6999f2913c3)
  - [Introduction to Web Audio API](https://css-tricks.com/introduction-web-audio-api)
+ - [IBM Cloud](https://console.bluemix.net/)
+ - [Getting started with the IBM Cloud CLI](https://console.bluemix.net/docs/cli/index.html#overview)
+ - [Prepare the app for deployment - IBM Cloud](https://console.bluemix.net/docs/runtimes/nodejs/getting-started.html#prepare)
