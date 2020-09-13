@@ -25,8 +25,11 @@ let ZONEHEIGHT = VIDEOHEIGHT * ZONEFACTOR
 const LEFTWRIST = 9;
 const RIGHTWRIST = 10;
 const NOSE = 0;
+<<<<<<< HEAD
 const LEFTSHOULDER = 5;
 const RIGHTSHOULDER = 6;
+=======
+>>>>>>> simple change to get nose position and print it.
 
 
 let posenetModel = null
@@ -231,12 +234,20 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
   const leftWrist = keypoints[LEFTWRIST]
   const rightWrist = keypoints[RIGHTWRIST]
   const nose = keypoints[NOSE];
+<<<<<<< HEAD
   const leftShoulder = keypoints[LEFTSHOULDER];
   const rightShoulder = keypoints[RIGHTSHOULDER];
 
   if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
     // Normalize keypoints to values between 0 and 1 (horizontally & vertically)
     const position = normalizeMusicPositions(leftWrist, rightWrist, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
+=======
+
+
+  if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
+    // Normalize keypoints to values between 0 and 1 (horizontally & vertically)
+    const position = normalizePositions(leftWrist, rightWrist, nose, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
+>>>>>>> simple change to get nose position and print it.
 
     if (position.right.vertical > 0 && position.left.horizontal > 0) {
       playNote(
@@ -330,9 +341,14 @@ const normalizeUserPlacementPositions = function(leftShoulder, rightShoulder, no
  *
  * @param {Object} leftWrist - posenet 'leftWrist' keypoints (corresponds to user's right hand)
  * @param {Object} rightWrist - posenet 'rightWrist' keypoints (corresponds to user's left hand)
+ * @param {Object} nose - posenet 'nose' keypoints (corresponding to the user's nose)
  * @param {Number} notesTopOffset - top edge (max position) for computing vertical notes
  */
+<<<<<<< HEAD
 const normalizeMusicPositions = function (leftWrist, rightWrist, topOffset = ZONEOFFSET, bottomOffset = ZONEHEIGHT) {
+=======
+const normalizePositions = function (leftWrist, rightWrist, nose, topOffset = ZONEOFFSET, bottomOffset = ZONEHEIGHT) {
+>>>>>>> simple change to get nose position and print it.
   const leftZone = leftWrist.position
   const rightZone = rightWrist.position
 
@@ -351,6 +367,13 @@ const normalizeMusicPositions = function (leftWrist, rightWrist, topOffset = ZON
       vertical: 0,
       horizontal: 0
     },
+<<<<<<< HEAD
+=======
+    nose: {
+      vertical: 0,
+      horizontal: 0,
+    }
+>>>>>>> simple change to get nose position and print it.
   }
 
   if (rightZone.x >= verticalSplit && rightZone.x <= rightEdge) {
@@ -365,6 +388,17 @@ const normalizeMusicPositions = function (leftWrist, rightWrist, topOffset = ZON
   if (leftZone.y <= ZONEHEIGHT && leftZone.y >= ZONEOFFSET) {
     position.left.vertical = computePercentage(leftZone.y, ZONEHEIGHT, ZONEOFFSET)
   }
+  if (nose.position.x >= verticalSplit && nose.position.x <= rightEdge) {
+    position.nose.horizontal = computePercentage(nose.position.x, verticalSplit, rightEdge)
+  } else if (nose.position.x <= verticalSplit && nose.position.x >= leftEdge) {
+    position.nose.horizontal = computePercentage(nose.position.x, leftEdge, verticalSplit) * -1;
+  }
+  if (nose.position.y <= ZONEHEIGHT && nose.position.y <= ZONEOFFSET) {
+    position.nose.vertical = computePercentage(nose.position.y, ZONEHEIGHT, ZONEOFFSET)
+  }
+
+  console.log('nose x: ' + position.nose.horizontal);
+  console.log('nose y:' + position.nose.vertical);
 
   return position
 }
