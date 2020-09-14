@@ -5,6 +5,7 @@ import { playNote, getMidiDevices, getAnalyzerValue } from './audio-controller.j
 import { drawKeypoints, drawSkeleton, drawBox, drawWave, drawScale, drawText } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
 import { chords } from './chord-intervals.js'
+import { setMqttEnable, setLoggingEnabled, sendNose, sendKeypoints, sendShoulder, sendAngle } from './mqtt-manager.js'
 
 const isMobile = function () {
   const isAndroid = /Android/i.test(navigator.userAgent)
@@ -24,6 +25,8 @@ let ZONEHEIGHT = VIDEOHEIGHT * ZONEFACTOR
 const LEFTWRIST = 9;
 const RIGHTWRIST = 10;
 const NOSE = 0;
+const LEFTSHOULDER = 5;
+const RIGHTSHOULDER = 6;
 
 
 let posenetModel = null
@@ -164,6 +167,10 @@ const detectPoseInRealTime = function (video) {
         [ZONEOFFSET, ZONEHEIGHT])
     }
 
+    // enable or disable sending mqtt data and logging it locally
+    setMqttEnable(guiState.mqtt.on)
+    setLoggingEnabled(guiState.mqtt.log)
+
     // Loop through each pose (i.e. person) detected
     poses.forEach(({ score, keypoints }) => {
       if (score >= minPoseConfidence) {
@@ -188,17 +195,36 @@ const detectPoseInRealTime = function (video) {
 }
 
 /**
+ * 
+ * 
+ * @param {Number} noseXPercent - The percentage of one half of the screen the user is to the left or the right
+ * of the middle dividing line
+ * This assumes that the FOV of the camera being used is 120 degrees. This is the standard angle for most cameras so it seems relatively safe.
+ */
+const calculateAngle = function(noseXPercent) {
+  let data = {'rotateLeft': 0}
+  if(noseXPercent < 0) {
+    data = {'rotateRight': 0}
+    data['rotateRight'] = noseXPercent * -1  * 60; 
+  } else {
+    data['rotateLeft'] = noseXPercent * 60; 
+  }
+  return data
+}
+
+/**
  * Draw the resulting skeleton and keypoints and send data to play corresponding note
  */
 const processPose = function (score, keypoints, minPartConfidence, topOffset, notesOffset, chordsArray, canvasCtx) {
   const leftWrist = keypoints[LEFTWRIST]
   const rightWrist = keypoints[RIGHTWRIST]
   const nose = keypoints[NOSE];
-
+  const leftShoulder = keypoints[LEFTSHOULDER];
+  const rightShoulder = keypoints[RIGHTSHOULDER];
 
   if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
     // Normalize keypoints to values between 0 and 1 (horizontally & vertically)
-    const position = normalizePositions(leftWrist, rightWrist, nose, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
+    const position = normalizeMusicPositions(leftWrist, rightWrist, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
 
     if (position.right.vertical > 0 && position.left.horizontal > 0) {
       playNote(
@@ -213,6 +239,23 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
   } else {
     playNote(0, 0)
   }
+  let userPosition = {};
+  if (nose.score > minPartConfidence && leftShoulder.score > minPartConfidence && rightShoulder.score > minPartConfidence) {
+    userPosition = normalizeUserPlacementPositions(leftShoulder, rightShoulder, nose, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
+    sendNose(userPosition['nose']);
+    sendAngle(calculateAngle(userPosition['nose']['x']))
+
+      // .5 meters is 50%-52% of the screen
+    // 1 meter is 27 -> 29% of the screen
+    // 1.5 meters is 20->21%
+    // 2 meters is 16 to 17%
+    // 2.5 meters projection is 13 -> 15
+    // This is likely overfitting in some capacity but it should be fine for our purposes
+    let estimatedDist = 28.635 * userPosition['shoulderWidthPercent'] ** -.816; 
+    sendShoulder(estimatedDist);
+  }
+
+  sendKeypoints(keypoints);
 
   if (guiState.canvas.showPoints) {
     drawKeypoints(keypoints, minPartConfidence, canvasCtx)
@@ -223,14 +266,56 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
 }
 
 /**
+ * Returns an object with the users position data for their nose, and shoulders between 0 and 1 such that we can calculate how the robot
+ * watching for this data should move
+ * 
+ * @param {Object} leftShoulder  - posenet 'leftshoulder' keypoint corresponding to the users left shoulder
+ * @param {Object} rightShoulder - posenet 'rightshoulder' keypoint corresponding to users right shoulder
+ * @param {Object} nose - posenet 'nose' keypoints (corresponding to the user's nose)
+ * @param {Object} topOffset - top edge (max position) for computing the edge of the screen
+ * @param {Object} bottomOffset - bottom edge (min position) for computing jthe edge of the video screen
+ */
+const normalizeUserPlacementPositions = function(leftShoulder, rightShoulder, nose, topOffset=ZONEOFFSET, bottomOffset=ZONEHEIGHT) {
+
+  const leftEdge = ZONEOFFSET
+  const verticalSplit = ZONEWIDTH
+  const rightEdge = VIDEOWIDTH - ZONEOFFSET
+  const shoulderWidth = rightShoulder.position.x - leftShoulder.position.x;
+
+  // shoulderWidthPercent is the percentage of the horizontal screen width the users shoulders take up
+  let position = {
+    shoulderWidthPercent: 0,
+    nose: {
+      x: 0,
+      y: 0
+    }
+  }
+
+  if (nose.position.x >= verticalSplit && nose.position.x <= rightEdge) {
+    position.nose.x = computePercentage(nose.position.x, verticalSplit, rightEdge)
+  } else if (nose.position.x <= verticalSplit && nose.position.x >= leftEdge) {
+    position.nose.x = computePercentage(nose.position.x, leftEdge, verticalSplit) - 1;
+  }
+  if (nose.position.y <= ZONEHEIGHT && nose.position.y <= ZONEOFFSET) {
+    position.nose.y = computePercentage(nose.position.y, ZONEHEIGHT, ZONEOFFSET)
+  }
+
+  if (leftShoulder.position.x <= rightEdge && leftShoulder.position.x >= leftEdge &&
+      rightShoulder.position.x <= rightEdge && rightShoulder.position.x >= leftEdge) {
+        position.shoulderWidthPercent = computePercentage(shoulderWidth, 0, rightEdge - leftEdge) 
+      }
+
+  return position;
+}
+
+/**
  * Returns an object the horizontal and vertical positions of left and right wrist normalized between 0 and 1
  *
  * @param {Object} leftWrist - posenet 'leftWrist' keypoints (corresponds to user's right hand)
  * @param {Object} rightWrist - posenet 'rightWrist' keypoints (corresponds to user's left hand)
- * @param {Object} nose - posenet 'nose' keypoints (corresponding to the user's nose)
  * @param {Number} notesTopOffset - top edge (max position) for computing vertical notes
  */
-const normalizePositions = function (leftWrist, rightWrist, nose, topOffset = ZONEOFFSET, bottomOffset = ZONEHEIGHT) {
+const normalizeMusicPositions = function (leftWrist, rightWrist, topOffset = ZONEOFFSET, bottomOffset = ZONEHEIGHT) {
   const leftZone = leftWrist.position
   const rightZone = rightWrist.position
 
@@ -249,10 +334,6 @@ const normalizePositions = function (leftWrist, rightWrist, nose, topOffset = ZO
       vertical: 0,
       horizontal: 0
     },
-    nose: {
-      vertical: 0,
-      horizontal: 0,
-    }
   }
 
   if (rightZone.x >= verticalSplit && rightZone.x <= rightEdge) {
@@ -267,17 +348,6 @@ const normalizePositions = function (leftWrist, rightWrist, nose, topOffset = ZO
   if (leftZone.y <= ZONEHEIGHT && leftZone.y >= ZONEOFFSET) {
     position.left.vertical = computePercentage(leftZone.y, ZONEHEIGHT, ZONEOFFSET)
   }
-  if (nose.position.x >= verticalSplit && nose.position.x <= rightEdge) {
-    position.nose.horizontal = computePercentage(nose.position.x, verticalSplit, rightEdge)
-  } else if (nose.position.x <= verticalSplit && nose.position.x >= leftEdge) {
-    position.nose.horizontal = computePercentage(nose.position.x, leftEdge, verticalSplit) * -1;
-  }
-  if (nose.position.y <= ZONEHEIGHT && nose.position.y <= ZONEOFFSET) {
-    position.nose.vertical = computePercentage(nose.position.y, ZONEHEIGHT, ZONEOFFSET)
-  }
-
-  console.log('nose x: ' + position.nose.horizontal);
-  console.log('nose y:' + position.nose.vertical);
 
   return position
 }
@@ -372,3 +442,7 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(init, 500)
 }
+
+// window.addEventListener('beforeunload', function(e) {
+//   closeClient();
+// });
