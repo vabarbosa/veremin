@@ -1,116 +1,133 @@
 /* global Paho */
 
-// instantiate client as nothing to no
-var client = new Paho.MQTT.Client('broker.mqttdashboard.com', 8000, "Doug'sID1235");
+export class MqttClient {
+  /**
+   * A constructor for the MQTT class that will handle all of this logic
+   * @param {String} brokerUrl - The url to the broker that will push incoming messages to subscribers
+   * @param {String} clientId - The unique id for this client
+   * @param {String} uniqueEndpointVal - To prevent collisions of multiple people running this code at the same time
+   *    Users can create a unique id so their endpoint routes are different from others
+   * @param {Boolean} enabled - Whether or not mqtt is enabled at all. If MQTT isn't enabled, then this code doesn't do much.
+   * @param {Boolean} shouldLog - Logs the messages recieved to the new box in the settings sidebar
+   */
+  constructor(brokerUrl, clientId, uniqueEndpointVal, enabled, shouldLog) {
+    this.client = new Paho.MQTT.Client(brokerUrl, 8000, clientId);
+    console.log('round 1' + this.client)
+    this._keypointsTopic = '/veremin/' + uniqueEndpointVal +'/keypoints/';
+    this._noseTopic = '/veremin/' + uniqueEndpointVal +'/nose/';
+    this._shoulderWidthTopic = '/veremin/' + uniqueEndpointVal + '/shoulder/';
+    this._angleTopic = '/veremin/' + uniqueEndpointVal + '/angle/'
+    this.subscriptionUrl = '/veremin/' + uniqueEndpointVal + '/#'
+    this._initialConnectDone = false;
 
-const keypointsTopic = '/veremin/keypoints/';
-const noseTopic = '/veremin/nose/';
-const shoulderWidthTopic = '/veremin/shoulder/';
-const angleTopic = '/veremin/angle/'
-let initialConnectDone = false;
-
-let mqttEnabled = false;
-let loggingEnabled = true;
-
-
-export function setMqttEnable(enabled) {
-  if (enabled && !mqttEnabled) {
-    mqttEnabled = true;
-    startMqtt()
-  } else if(!enabled && mqttEnabled) {
-    mqttEnabled = false;
-    stopMqtt();
+    this._enabled = enabled;
+    if (enabled) {
+      this._startMqtt()
+    }
+    this._loggingEnabled = shouldLog;
   }
-}
 
-export function setLoggingEnabled(enabled) {
-  loggingEnabled = enabled;
-}
-
-function startMqtt() {
-  initialConnectDone = false;
-  // set callback handlers
-  client.onConnectionLost = onConnectionLost;
-  client.onMessageArrived = onMessageArrived;
-
-  // connect the client
-  client.connect({onSuccess:onConnect});
-}
-
-function stopMqtt() {
-  client.disconnect()
-}
-
-// called when the client connects
-function onConnect() {
-  // Once a connection has been made, make a subscription and send a message.
-  console.log("onConnect");
-  client.subscribe("/veremin/#");
-  var message = new Paho.MQTT.Message("Hello");
-  message.destinationName = "/veremin/World";
-  client.send(message);
-  initialConnectDone = true;
-}
-
-// called when the client loses its connection
-function onConnectionLost(responseObject) {
-  if (responseObject.errorCode !== 0) {
-    console.log("onConnectionLost:"+responseObject.errorMessage);
+  setMqttEnabled(enabled) {
+    if (enabled && !this._enabled) {
+      this._enabled = true;
+      this._startMqtt()
+    } else if(!enabled && this._enabled) {
+      this._enabled = false;
+      this._stopMqtt();
+    }
   }
-  initialConnectDone = false;
-}
 
-/**
- * Sends an mqtt message with a given topic and data once the data is verified to have a value
- * and the connection is checked to be up. Reconnects if the connection is not up
- * 
- * @param {String} topic - The topic that the message is published to on mqtt
- * @param {Object} data  - The data that is being published
- */
-function sendMqttMessage(topic, data) {
-  if(!data) {
-    console.log('Data is falsey, not sending it:');
-    console.log(JSON.stringify(data));
-    return;
+  setShouldLog(enabled) {
+    this._loggingEnabled = enabled;
   }
-  if (!initialConnectDone) {
-    return;
+
+  _startMqtt() {
+    this._initialConnectDone = false;
+    // set callback handlers
+    this.client.onConnectionLost = (responseObject) => { 
+      this._onConnectionLost(responseObject) 
+    };
+    this.client.onMessageArrived = (message) => { 
+      this._onMessageArrived(message) 
+    };
+  
+    // connect the client
+    this.client.connect({onSuccess: () => {this._onConnect()}});
   }
-  // if (!client.connected) {
-  //   // Multiple reconnect events firing at once was a problem. This check
-  //   // causes us to drop messages while reconnecting to make sure that isn't a problem.
-  //   // Dropping messages while we don't have a connection in this use case should be fine.
-  //   if(!reconnecting) {
-  //     reconnect().then(function() {
-  //       client.publish(topic, JSON.stringify(data), {}, console.log);
-  //     });
-  //   }
-  // } else {
-    var message = new Paho.MQTT.Message(JSON.stringify(data));
-    message.destinationName = topic;
-    client.send(message);
-  // }
-}
-
-export function sendNose(data) {
-  sendMqttMessage(noseTopic, data);
-}
-
-export function sendShoulder(data) {
-  sendMqttMessage(shoulderWidthTopic, data);
-}
-
-export function sendKeypoints(data) {
-  sendMqttMessage(keypointsTopic, data)
-}
-
-export function sendAngle(data) {
-  sendMqttMessage(angleTopic, data)
-}
-
-// called when a message arrives
-function onMessageArrived(message) {
-  if(loggingEnabled) {
-    console.log("onMessageArrived TOPIC: " + message.destinationName + '\nCONTENT: ' + message.payloadString);
+  
+  _stopMqtt() {
+    this.client.disconnect()
   }
-}
+
+  // called when the client connects
+  _onConnect() {
+    // Once a connection has been made, make a subscription and send a message.
+    console.log("onConnect");
+    console.log("subscribed to: " + this.subscriptionUrl)
+    this.client.subscribe(this.subscriptionUrl);
+    this._initialConnectDone = true;
+  }
+
+  // called when the client loses its connection
+  _onConnectionLost(responseObject) {
+    if (responseObject.errorCode !== 0) {
+      console.log("onConnectionLost:"+responseObject.errorMessage);
+    }
+    this._initialConnectDone = false;
+  }
+
+    /**
+   * Sends an mqtt message with a given topic and data once the data is verified to have a value
+   * and the connection is checked to be up. Reconnects if the connection is not up
+   * 
+   * @param {String} topic - The topic that the message is published to on mqtt
+   * @param {Object} data  - The data that is being published
+   */
+  _sendMqttMessage(topic, data) {
+    if(!data) {
+      console.log('Data is falsey, not sending it:');
+      console.log(JSON.stringify(data));
+      return;
+    }
+    if (!this._initialConnectDone) {
+      return;
+    }
+    // if (!client.connected) {
+    //   // Multiple reconnect events firing at once was a problem. This check
+    //   // causes us to drop messages while reconnecting to make sure that isn't a problem.
+    //   // Dropping messages while we don't have a connection in this use case should be fine.
+    //   if(!reconnecting) {
+    //     reconnect().then(function() {
+    //       client.publish(topic, JSON.stringify(data), {}, console.log);
+    //     });
+    //   }
+    // } else {
+      var message = new Paho.MQTT.Message(JSON.stringify(data));
+      message.destinationName = topic;
+      this.client.send(message);
+    // }
+  }
+
+  sendNose(data) {
+    this._sendMqttMessage(this._noseTopic, data);
+  }
+
+  sendShoulder(data) {
+    this._sendMqttMessage(this._shoulderWidthTopic, data);
+  }
+
+  sendKeypoints(data) {
+    this._sendMqttMessage(this._keypointsTopic, data)
+  }
+
+  sendAngle(data) {
+    this._sendMqttMessage(this._angleTopic, data)
+  }
+
+  // called when a message arrives
+  _onMessageArrived(message) {
+    if(this._loggingEnabled) {
+      console.log("onMessageArrived TOPIC: " + message.destinationName + '\nCONTENT: ' + message.payloadString);
+    }
+  }
+};

@@ -5,7 +5,7 @@ import { playNote, getMidiDevices, getAnalyzerValue } from './audio-controller.j
 import { drawKeypoints, drawSkeleton, drawBox, drawWave, drawScale, drawText } from './canvas-overlay.js'
 import { guiState, setupGui } from './control-panel.js'
 import { chords } from './chord-intervals.js'
-import { setMqttEnable, setLoggingEnabled, sendNose, sendKeypoints, sendShoulder, sendAngle } from './mqtt-manager.js'
+import { MqttClient } from './mqtt-manager.js'
 
 const isMobile = function () {
   const isAndroid = /Android/i.test(navigator.userAgent)
@@ -30,6 +30,8 @@ const RIGHTSHOULDER = 6;
 
 
 let posenetModel = null
+
+let mqttClient = null;
 
 let fpsTime = 0
 let fpsFrames = 0
@@ -167,9 +169,17 @@ const detectPoseInRealTime = function (video) {
         [ZONEOFFSET, ZONEHEIGHT])
     }
 
-    // enable or disable sending mqtt data and logging it locally
-    setMqttEnable(guiState.mqtt.on)
-    setLoggingEnabled(guiState.mqtt.log)
+    if(!mqttClient) {
+      mqttClient = new MqttClient(
+        guiState.mqtt.brokerURL, 
+        guiState.mqtt.clientId, 
+        guiState.mqtt.endpointVal, 
+        guiState.mqtt.on, 
+        guiState.mqtt.log)
+    }
+
+    mqttClient.setMqttEnabled(guiState.mqtt.on)
+    mqttClient.setShouldLog(guiState.mqtt.log)
 
     // Loop through each pose (i.e. person) detected
     poses.forEach(({ score, keypoints }) => {
@@ -244,8 +254,8 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
     let userPosition = {};
     if (nose.score > minPartConfidence && leftShoulder.score > minPartConfidence && rightShoulder.score > minPartConfidence) {
       userPosition = normalizeUserPlacementPositions(leftShoulder, rightShoulder, nose, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
-      sendNose(userPosition['nose']);
-      sendAngle(calculateAngle(userPosition['nose']['x']))
+      mqttClient.sendNose(userPosition['nose']);
+      mqttClient.sendAngle(calculateAngle(userPosition['nose']['x']))
   
         // .5 meters is 50%-52% of the screen
       // 1 meter is 27 -> 29% of the screen
@@ -254,10 +264,10 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
       // 2.5 meters projection is 13 -> 15
       // This is likely overfitting in some capacity but it should be fine for our purposes
       let estimatedDist = 28.635 * userPosition['shoulderWidthPercent'] ** -.816; 
-      sendShoulder(estimatedDist);
+      mqttClient.sendShoulder(estimatedDist);
     }
   
-    sendKeypoints(keypoints);
+    mqttClient.sendKeypoints(keypoints);
   }
 
   if (guiState.canvas.showPoints) {
@@ -445,7 +455,3 @@ if (document.readyState === 'loading') {
 } else {
   setTimeout(init, 500)
 }
-
-// window.addEventListener('beforeunload', function(e) {
-//   closeClient();
-// });
