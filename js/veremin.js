@@ -256,8 +256,8 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
     let userPosition = {};
     if (nose.score > minPartConfidence && leftShoulder.score > minPartConfidence && rightShoulder.score > minPartConfidence) {
       userPosition = normalizeUserPlacementPositions(leftShoulder, rightShoulder, nose, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
-      sendNose(userPosition['nose']);
-      sendAngle(calculateAngle(userPosition['nose']['x']))
+      mqttClient.sendNose(userPosition['nose']);
+      mqttClient.sendAngle(calculateAngle(userPosition['nose']['x']))
   
         // .5 meters is 50%-52% of the screen
       // 1 meter is 27 -> 29% of the screen
@@ -266,10 +266,10 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
       // 2.5 meters projection is 13 -> 15
       // This is likely overfitting in some capacity but it should be fine for our purposes
       let estimatedDist = 28.635 * userPosition['shoulderWidthPercent'] ** -.816; 
-      sendShoulder(estimatedDist);
+      mqttClient.sendShoulder(estimatedDist);
     }
   
-    sendKeypoints(keypoints);
+    mqttClient.sendKeypoints(keypoints);
   }
 
   if(guiState.mqtt.on) {
