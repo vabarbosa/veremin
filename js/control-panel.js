@@ -43,7 +43,7 @@ export let guiState = {
   mqtt: {
     // Sends and reads mqtt data of all of the user positional data to the mqtt
     // end points defined in mqtt-manager.js
-    on: true,
+    on: false,
     // doesn't do anything unless mqtt is on, 
     // this makes it so that it logs what it finds on the given mqtt end points
     log: true,
