@@ -43,13 +43,15 @@ export let guiState = {
   mqtt: {
     // Sends and reads mqtt data of all of the user positional data to the mqtt
     // end points defined in mqtt-manager.js
-    on: true,
+    on: false,
     // doesn't do anything unless mqtt is on, 
     // this makes it so that it logs what it finds on the given mqtt end points
     log: true,
     brokerURL: 'broker.mqttdashboard.com',
     clientId: 'UniqueVereminClientId',
-    endpointVal: 'UniqueEndpointVal'
+    endpointVal: 'UniqueEndpointVal',
+    cameraFOV: 120,
+    distanceMult: 1
   }
 }
 
@@ -164,6 +166,11 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   let mqtt = gui.addFolder('Mqtt')
   mqtt.add(guiState.mqtt, 'on')
   mqtt.add(guiState.mqtt, 'log')
+  mqtt.add(guiState.mqtt, 'brokerURL')
+  mqtt.add(guiState.mqtt, 'clientId')
+  mqtt.add(guiState.mqtt, 'endpointVal')
+  mqtt.add(guiState.mqtt, 'cameraFOV')
+  mqtt.add(guiState.mqtt, 'distanceMult', 0.25, 4.0)
 
   architectureController.onChange(function (architecture) {
     guiState.changeToArchitecture = architecture

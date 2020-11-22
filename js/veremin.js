@@ -169,7 +169,9 @@ const detectPoseInRealTime = function (video) {
         [ZONEOFFSET, ZONEHEIGHT])
     }
 
-    if(!mqttClient) {
+    // If we don't have an mqtt client or if the gui says on, but the client isn't
+    // enabled, as in we are transitioning into the on state, reset the mqtt clients params
+    if(!mqttClient || (guiState.mqtt.on && !mqttClient.getEnabled())) {
       mqttClient = new MqttClient(
         guiState.mqtt.brokerURL, 
         guiState.mqtt.clientId, 
@@ -215,9 +217,9 @@ const calculateAngle = function(noseXPercent) {
   let data = {'rotateLeft': 0}
   if(noseXPercent < 0) {
     data = {'rotateRight': 0}
-    data['rotateRight'] = noseXPercent * -1  * 60; 
+    data['rotateRight'] = noseXPercent * -1  * guiState.mqtt.cameraFOV / 2; 
   } else {
-    data['rotateLeft'] = noseXPercent * 60; 
+    data['rotateLeft'] = noseXPercent * guiState.mqtt.cameraFOV / 2; 
   }
   return data
 }
@@ -263,8 +265,10 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
       // 2 meters is 16 to 17%
       // 2.5 meters projection is 13 -> 15
       // This is likely overfitting in some capacity but it should be fine for our purposes
-      let estimatedDist = 28.635 * userPosition['shoulderWidthPercent'] ** -.816; 
-      mqttClient.sendShoulder(estimatedDist);
+      console.log('% = ' + userPosition['shoulderWidthPercent'])
+      let estimatedDist = guiState.mqtt.distanceMult * 60.873 * (100 * userPosition['shoulderWidthPercent']) ** -1.225; 
+      console.log('estimated dist: ' + estimatedDist)
+      mqttClient.sendEstDist(estimatedDist);
     }
   
     mqttClient.sendKeypoints(keypoints);

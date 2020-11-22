@@ -12,10 +12,10 @@ export class MqttClient {
    */
   constructor(brokerUrl, clientId, uniqueEndpointVal, enabled, shouldLog) {
     this.client = new Paho.MQTT.Client(brokerUrl, 8000, clientId);
-    console.log('round 1' + this.client)
+    console.log('constructor for mqtt: ' + brokerUrl + '\n' + clientId + '\n' + uniqueEndpointVal + '\n' + enabled + '\n' + shouldLog)
     this._keypointsTopic = '/veremin/' + uniqueEndpointVal +'/keypoints/';
     this._noseTopic = '/veremin/' + uniqueEndpointVal +'/nose/';
-    this._shoulderWidthTopic = '/veremin/' + uniqueEndpointVal + '/shoulder/';
+    this._estDistTopic = '/veremin/' + uniqueEndpointVal + '/distance/';
     this._angleTopic = '/veremin/' + uniqueEndpointVal + '/angle/'
     this.subscriptionUrl = '/veremin/' + uniqueEndpointVal + '/#'
     this._initialConnectDone = false;
@@ -102,18 +102,24 @@ export class MqttClient {
     //     });
     //   }
     // } else {
-      var message = new Paho.MQTT.Message(JSON.stringify(data));
+      let dataStr = JSON.stringify(data)
+      dataStr = dataStr.replaceAll(/\.[0-9]+/g, this._replacer)
+      var message = new Paho.MQTT.Message(dataStr);
       message.destinationName = topic;
       this.client.send(message);
     // }
+  }
+
+  _replacer(match) {
+    return match.substr(0, 3)
   }
 
   sendNose(data) {
     this._sendMqttMessage(this._noseTopic, data);
   }
 
-  sendShoulder(data) {
-    this._sendMqttMessage(this._shoulderWidthTopic, data);
+  sendEstDist(data) {
+    this._sendMqttMessage(this._estDistTopic, data);
   }
 
   sendKeypoints(data) {
@@ -129,5 +135,9 @@ export class MqttClient {
     if(this._loggingEnabled) {
       console.log("onMessageArrived TOPIC: " + message.destinationName + '\nCONTENT: ' + message.payloadString);
     }
+  }
+
+  getEnabled() {
+    return this._enabled
   }
 };
