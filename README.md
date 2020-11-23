@@ -8,6 +8,8 @@ PoseNet is used to predict the location of your wrists within the video. The app
 
 Browsers must allow [access to the webcam](https://caniuse.com/#feat=stream) and support the [Web Audio API](https://caniuse.com/#feat=audio-api). Optionally, to integrate with a MIDI device the browser will need to support the [Web MIDI API](https://caniuse.com/#feat=midi) (e.g., Chrome browser version 43 or later). 
 
+If you would like to use the pose estimation to control another device you can turn on Mqtt to publish the data to an mqtt server that your device can subscribe to.
+
 ## Watch the video
 
 [![](http://img.youtube.com/vi/ZCs8LBBZqas/0.jpg)](https://youtu.be/ZCs8LBBZqas)
@@ -19,6 +21,7 @@ Browsers must allow [access to the webcam](https://caniuse.com/#feat=stream) and
 - [Web MIDI API](https://www.w3.org/TR/webmidi) - an API supporting the MIDI protocol, enabling web applications to enumerate and select MIDI input and output devices on the client system and send and receive MIDI messages
 - [Web Audio API](https://www.w3.org/TR/webaudio) - a high-level Web API for processing and synthesizing audio in web applications
 - [Tone.js](https://tonejs.github.io/) - a framework for creating interactive music in the browser
+- [Mqtt](https://www.eclipse.org/paho/index.php?page=clients/js/index.php) - A IOT communication framework for publisher/subscriber based communication for publishing data
 
 
 ## Live demo
