@@ -1,6 +1,11 @@
 .gitignore
 .DS_Store
+
 .vscode
+.github
+
+package*.json
 README.md
 CONTROLPANEL.md
+
 node_modules

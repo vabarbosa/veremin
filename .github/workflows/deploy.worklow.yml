@@ -1,0 +1,44 @@
+name: deploy veremin
+
+on:
+  # run when action is manually triggered
+  workflow_dispatch:
+  # run on pushes to main branch
+  push:
+    branches: [ main ]
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+  IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+  IBM_CLOUD_REGION: us-south
+  IBM_CLOUD_ORG: ${{ secrets.IBM_CLOUD_ORG }}
+  IBM_CLOUD_SPACE: dev
+
+jobs:
+  # job id/key
+  deploy-to-ibm-cloud:
+    # job name
+    name: Deploy Veremin to IBM Cloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # Download and Install IBM Cloud CLI
+      - name: Install IBM Cloud CLI
+        run: |
+          curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+          ibmcloud --version
+          ibmcloud config --check-version=false
+          ibmcloud cf install
+
+      # Authenticate with IBM Cloud CLI and target Cloud Foundry org and space
+      - name: Authenticate with IBM Cloud CLI
+        run: |
+          ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g default
+          ibmcloud target -o "${IBM_CLOUD_ORG}" -s "${IBM_CLOUD_SPACE}"
+
+      # Push Veremin to IBM Cloud
+      - name: Deploy Veremin
+        run: |
+          ibmcloud cf push
