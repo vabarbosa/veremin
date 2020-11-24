@@ -320,6 +320,9 @@ footer {
 .toggle-btn {
   display: inline-block;
 }
+.toggle-btn:hover {
+  color: var(--secondary-back);
+}
 .toggle-btn-input {
   position: absolute;
   width: 1px;
