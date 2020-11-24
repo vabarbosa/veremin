@@ -1,3 +1,13 @@
+![GitHub Action deploy status](https://github.com/vabarbosa/veremin/workflows/deploy%20veremin/badge.svg?branch=main)
+
+<p align="center">
+  <br/>
+  <a href="https://ibm.biz/veremin">
+    <img alt="veremin" src="favicons/veremin.svg" width="70"/>
+  </a>
+  <br/>
+</p>
+
 # Veremin
 
 Veremin is a video theremin based on [PoseNet](https://github.com/tensorflow/tfjs-models/tree/master/posenet) and the brainchild of [John Cohn](https://github.com/johncohn).
