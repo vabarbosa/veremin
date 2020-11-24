@@ -39,6 +39,12 @@
     <span>veremin</span><br>
     <span>a video theremin based on PoseNet</span>
     <div id="btn-grp">
+      <div class="toggle-btn" title="pause veremin">
+        <input class="toggle-btn-input" id="toggle-checkbox" type="checkbox" onchange="toggleVeremin();" checked>
+        <label class="toggle-btn-label" for="toggle-checkbox">
+          <span class="toggle-btn-ui"></span>
+        </label>
+      </div>
       <button id="open-cp-btn" onclick="document.getElementById('control-panel').classList.remove('closed')" title="open control panel">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"  height="24" width="24">
           <path d="M30 7h-5.1a5 5 0 0 0-9.8 0H2v2h13.1a5 5 0 0 0 9.8 0H30zm-10 4a3 3 0 1 1 3-3 3 3 0 0 1-3 3zM2 25h5.1a5 5 0 0 0 9.8 0H30v-2H16.9a5 5 0 0 0-9.8 0H2zm7-1a3 3 0 1 1 3 3 3 3 0 0 1-3-3z"></path>

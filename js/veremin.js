@@ -1,4 +1,4 @@
-/* global tf, posenet, requestAnimationFrame, performance, updateEnvInfo */
+/* global tf, posenet, requestAnimationFrame, performance, updateEnvInfo, toggleVeremin */
 
 import { loadVideo, preferredVideoSize } from './camera-util.js'
 import { playNote, getMidiDevices, getAnalyzerValue } from './audio-controller.js'
@@ -28,7 +28,7 @@ const NOSE = 0;
 const LEFTSHOULDER = 5;
 const RIGHTSHOULDER = 6;
 
-
+let paused = false
 let posenetModel = null
 
 let mqttClient = null;
@@ -85,120 +85,122 @@ const detectPoseInRealTime = function (video) {
   canvas.height = VIDEOHEIGHT
 
   async function poseDetectionFrame () {
-    if (guiState.changeToArchitecture) {
-      // Important to purge variables and free up GPU memory
-      posenetModel.dispose()
+    if (!paused) {
+      if (guiState.changeToArchitecture) {
+        // Important to purge variables and free up GPU memory
+        posenetModel.dispose()
 
-      // Load the PoseNet model weights for changed architecture
-      posenetModel = await posenet.load({
-        architecture: guiState.changeToArchitecture,
-        outputStride: guiState.outputStride,
-        inputResolution: guiState.inputResolution,
-        multiplier: guiState.multiplier
+        // Load the PoseNet model weights for changed architecture
+        posenetModel = await posenet.load({
+          architecture: guiState.changeToArchitecture,
+          outputStride: guiState.outputStride,
+          inputResolution: guiState.inputResolution,
+          multiplier: guiState.multiplier
+        })
+
+        guiState.architecture = guiState.changeToArchitecture
+        guiState.changeToArchitecture = null
+      }
+
+      let poses = []
+      let minPoseConfidence
+      let minPartConfidence
+
+      switch (guiState.algorithm) {
+        case 'single-pose':
+          const pose = await posenetModel.estimateSinglePose(
+            video, {
+              flipHorizontal: flipHorizontal,
+              decodingMethod: 'single-person'
+            }
+          )
+          poses.push(pose)
+
+          minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence
+          minPartConfidence = +guiState.singlePoseDetection.minPartConfidence
+          break
+        case 'multi-pose':
+          poses = await posenetModel.estimateMultiplePoses(
+            video, {
+              flipHorizontal: flipHorizontal,
+              decodingMethod: 'multi-person',
+              maxDetections: guiState.multiPoseDetection.maxPoseDetections,
+              scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
+              nmsRadius: guiState.multiPoseDetection.nmsRadius
+            }
+          )
+
+          minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence
+          minPartConfidence = +guiState.multiPoseDetection.minPartConfidence
+          break
+      }
+
+      canvasCtx.clearRect(0, 0, VIDEOWIDTH, VIDEOHEIGHT)
+
+      const topOffset = ZONEHEIGHT - (ZONEHEIGHT * guiState.notesRangeScale) + ZONEOFFSET
+      const notesOffset = (ZONEHEIGHT - topOffset) * guiState.notesRangeOffset
+
+      const chordsInterval = guiState.chordIntervals === 'default' ? null : guiState.chordIntervals
+      let chordsArray = []
+      if (chordsInterval && chordsInterval !== 'default' && chords.hasOwnProperty(chordsInterval)) {
+        chordsArray = chords[chordsInterval]
+      }
+
+      if (guiState.canvas.showVideo) {
+        canvasCtx.save()
+        canvasCtx.scale(-1, 1)
+        canvasCtx.translate(-VIDEOWIDTH, 0)
+        canvasCtx.drawImage(video, 0, 0, VIDEOWIDTH, VIDEOHEIGHT)
+        canvasCtx.restore()
+      }
+
+      if (guiState.canvas.showZones) {
+        // draw left zone
+        drawBox(ZONEOFFSET, ZONEOFFSET, ZONEWIDTH, ZONEHEIGHT, canvasCtx)
+        // draw right zone
+        drawBox(ZONEWIDTH, ZONEOFFSET, VIDEOWIDTH - ZONEOFFSET, ZONEHEIGHT, canvasCtx)
+        // draw notes range scale
+        drawScale(
+          (VIDEOWIDTH - ZONEOFFSET),
+          (topOffset + notesOffset),
+          (VIDEOWIDTH - ZONEOFFSET),
+          (ZONEHEIGHT + notesOffset),
+          (chordsArray.length || 100),
+          canvasCtx,
+          [ZONEOFFSET, ZONEHEIGHT])
+      }
+
+      // If we don't have an mqtt client or if the gui says on, but the client isn't
+      // enabled, as in we are transitioning into the on state, reset the mqtt clients params
+      if(!mqttClient || (guiState.mqtt.on && !mqttClient.getEnabled())) {
+        mqttClient = new MqttClient(
+          guiState.mqtt.brokerURL, 
+          guiState.mqtt.brokerPort,
+          guiState.mqtt.clientId, 
+          guiState.mqtt.endpointVal, 
+          guiState.mqtt.on, 
+          guiState.mqtt.log)
+      }
+
+      mqttClient.setMqttEnabled(guiState.mqtt.on)
+      mqttClient.setShouldLog(guiState.mqtt.log)
+
+      // Loop through each pose (i.e. person) detected
+      poses.forEach(({ score, keypoints }) => {
+        if (score >= minPoseConfidence) {
+          processPose(score, keypoints, minPartConfidence, topOffset, notesOffset, chordsArray, canvasCtx)
+        }
       })
 
-      guiState.architecture = guiState.changeToArchitecture
-      guiState.changeToArchitecture = null
-    }
-
-    let poses = []
-    let minPoseConfidence
-    let minPartConfidence
-
-    switch (guiState.algorithm) {
-      case 'single-pose':
-        const pose = await posenetModel.estimateSinglePose(
-          video, {
-            flipHorizontal: flipHorizontal,
-            decodingMethod: 'single-person'
-          }
-        )
-        poses.push(pose)
-
-        minPoseConfidence = +guiState.singlePoseDetection.minPoseConfidence
-        minPartConfidence = +guiState.singlePoseDetection.minPartConfidence
-        break
-      case 'multi-pose':
-        poses = await posenetModel.estimateMultiplePoses(
-          video, {
-            flipHorizontal: flipHorizontal,
-            decodingMethod: 'multi-person',
-            maxDetections: guiState.multiPoseDetection.maxPoseDetections,
-            scoreThreshold: guiState.multiPoseDetection.minPartConfidence,
-            nmsRadius: guiState.multiPoseDetection.nmsRadius
-          }
-        )
-
-        minPoseConfidence = +guiState.multiPoseDetection.minPoseConfidence
-        minPartConfidence = +guiState.multiPoseDetection.minPartConfidence
-        break
-    }
-
-    canvasCtx.clearRect(0, 0, VIDEOWIDTH, VIDEOHEIGHT)
-
-    const topOffset = ZONEHEIGHT - (ZONEHEIGHT * guiState.notesRangeScale) + ZONEOFFSET
-    const notesOffset = (ZONEHEIGHT - topOffset) * guiState.notesRangeOffset
-
-    const chordsInterval = guiState.chordIntervals === 'default' ? null : guiState.chordIntervals
-    let chordsArray = []
-    if (chordsInterval && chordsInterval !== 'default' && chords.hasOwnProperty(chordsInterval)) {
-      chordsArray = chords[chordsInterval]
-    }
-
-    if (guiState.canvas.showVideo) {
-      canvasCtx.save()
-      canvasCtx.scale(-1, 1)
-      canvasCtx.translate(-VIDEOWIDTH, 0)
-      canvasCtx.drawImage(video, 0, 0, VIDEOWIDTH, VIDEOHEIGHT)
-      canvasCtx.restore()
-    }
-
-    if (guiState.canvas.showZones) {
-      // draw left zone
-      drawBox(ZONEOFFSET, ZONEOFFSET, ZONEWIDTH, ZONEHEIGHT, canvasCtx)
-      // draw right zone
-      drawBox(ZONEWIDTH, ZONEOFFSET, VIDEOWIDTH - ZONEOFFSET, ZONEHEIGHT, canvasCtx)
-      // draw notes range scale
-      drawScale(
-        (VIDEOWIDTH - ZONEOFFSET),
-        (topOffset + notesOffset),
-        (VIDEOWIDTH - ZONEOFFSET),
-        (ZONEHEIGHT + notesOffset),
-        (chordsArray.length || 100),
-        canvasCtx,
-        [ZONEOFFSET, ZONEHEIGHT])
-    }
-
-    // If we don't have an mqtt client or if the gui says on, but the client isn't
-    // enabled, as in we are transitioning into the on state, reset the mqtt clients params
-    if(!mqttClient || (guiState.mqtt.on && !mqttClient.getEnabled())) {
-      mqttClient = new MqttClient(
-        guiState.mqtt.brokerURL, 
-        guiState.mqtt.brokerPort,
-        guiState.mqtt.clientId, 
-        guiState.mqtt.endpointVal, 
-        guiState.mqtt.on, 
-        guiState.mqtt.log)
-    }
-
-    mqttClient.setMqttEnabled(guiState.mqtt.on)
-    mqttClient.setShouldLog(guiState.mqtt.log)
-
-    // Loop through each pose (i.e. person) detected
-    poses.forEach(({ score, keypoints }) => {
-      if (score >= minPoseConfidence) {
-        processPose(score, keypoints, minPartConfidence, topOffset, notesOffset, chordsArray, canvasCtx)
+      if (guiState.canvas.showWaveform) {
+        const value = getAnalyzerValue()
+        drawWave(value, waveCtx)
       }
-    })
 
-    if (guiState.canvas.showWaveform) {
-      const value = getAnalyzerValue()
-      drawWave(value, waveCtx)
-    }
-
-    // update frames per second
-    if (guiState.canvas.showFPS) {
-      drawText(`${computeFPS()} FPS`, (VIDEOWIDTH - ZONEOFFSET), (VIDEOHEIGHT - ZONEOFFSET), 'right', canvasCtx)
+      // update frames per second
+      if (guiState.canvas.showFPS) {
+        drawText(`${computeFPS()} FPS`, (VIDEOWIDTH - ZONEOFFSET), (VIDEOHEIGHT - ZONEOFFSET), 'right', canvasCtx)
+      }
     }
 
     requestAnimationFrame(poseDetectionFrame)
@@ -401,6 +403,7 @@ const bindPage = async function () {
     await setupGui([], mobile)
     body.className = 'ready'
     resize()
+    toggleVeremin()
     detectPoseInRealTime(video)
   } catch (e) {
     body.className = 'error'
@@ -409,6 +412,12 @@ const bindPage = async function () {
     updateEnvInfo('Error', e)
     throw e
   }
+}
+
+// toggle veremin on/off
+window.toggleVeremin = function () {
+  paused = !document.getElementById('toggle-checkbox').checked
+  console.log(`${paused ? 'Pausing' : 'Resuming'} Veremin`)
 }
 
 // update environment info
