@@ -140,8 +140,4 @@ export class MqttClient {
   getEnabled() {
     return this._enabled
   }
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> Fixed distance estimation, added values to control panel, did sig figs fix
