@@ -48,6 +48,7 @@ export let guiState = {
     // this makes it so that it logs what it finds on the given mqtt end points
     log: true,
     brokerURL: 'broker.mqttdashboard.com',
+    brokerPort: 8000,
     clientId: 'UniqueVereminClientId',
     endpointVal: 'UniqueEndpointVal',
     cameraFOV: 120,
@@ -167,6 +168,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   mqtt.add(guiState.mqtt, 'on')
   mqtt.add(guiState.mqtt, 'log')
   mqtt.add(guiState.mqtt, 'brokerURL')
+  mqtt.add(guiState.mqtt, 'brokerPort')
   mqtt.add(guiState.mqtt, 'clientId')
   mqtt.add(guiState.mqtt, 'endpointVal')
   mqtt.add(guiState.mqtt, 'cameraFOV')

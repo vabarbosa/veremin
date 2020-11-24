@@ -10,8 +10,8 @@ export class MqttClient {
    * @param {Boolean} enabled - Whether or not mqtt is enabled at all. If MQTT isn't enabled, then this code doesn't do much.
    * @param {Boolean} shouldLog - Logs the messages recieved to the new box in the settings sidebar
    */
-  constructor(brokerUrl, clientId, uniqueEndpointVal, enabled, shouldLog) {
-    this.client = new Paho.MQTT.Client(brokerUrl, 8000, clientId);
+  constructor(brokerUrl, brokerPort, clientId, uniqueEndpointVal, enabled, shouldLog) {
+    this.client = new Paho.MQTT.Client(brokerUrl, brokerPort, clientId);
     console.log('constructor for mqtt: ' + brokerUrl + '\n' + clientId + '\n' + uniqueEndpointVal + '\n' + enabled + '\n' + shouldLog)
     this._keypointsTopic = '/veremin/' + uniqueEndpointVal +'/keypoints/';
     this._noseTopic = '/veremin/' + uniqueEndpointVal +'/nose/';

@@ -174,6 +174,7 @@ const detectPoseInRealTime = function (video) {
     if(!mqttClient || (guiState.mqtt.on && !mqttClient.getEnabled())) {
       mqttClient = new MqttClient(
         guiState.mqtt.brokerURL, 
+        guiState.mqtt.brokerPort,
         guiState.mqtt.clientId, 
         guiState.mqtt.endpointVal, 
         guiState.mqtt.on, 
@@ -265,9 +266,7 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
       // 2 meters is 16 to 17%
       // 2.5 meters projection is 13 -> 15
       // This is likely overfitting in some capacity but it should be fine for our purposes
-      console.log('% = ' + userPosition['shoulderWidthPercent'])
       let estimatedDist = guiState.mqtt.distanceMult * 60.873 * (100 * userPosition['shoulderWidthPercent']) ** -1.225; 
-      console.log('estimated dist: ' + estimatedDist)
       mqttClient.sendEstDist(estimatedDist);
     }
   
