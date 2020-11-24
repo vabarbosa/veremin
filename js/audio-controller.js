@@ -171,7 +171,7 @@ export function setPreferredPreset (name) {
     tonejsAnalyser = null
   } else {
     const instrument = presets[name]
-    tonejsInstrument = new Tone[instrument.instrument]().toMaster()
+    tonejsInstrument = new Tone[instrument.instrument]().toDestination()
 
     if (!tonejsAnalyser) {
       tonejsAnalyser = new Tone.Waveform(FFTSIZE / 2)
