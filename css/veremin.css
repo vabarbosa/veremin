@@ -362,7 +362,7 @@ footer {
 }
 .toggle-btn-ui {
   position: relative;
-  width: 3rem;
+  width: 2.5rem;
   height: 1.5rem;
 }
 .toggle-btn-ui::before {
@@ -374,7 +374,7 @@ footer {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   height: 22px;
-  width: 2.9rem;
+  width: 2.25rem;
   border-radius: 0.9375rem;
   top: 1.5px;
   will-change: box-shadow;
@@ -412,6 +412,6 @@ footer {
 } */
 .toggle-btn-input:checked + .toggle-btn-label .toggle-btn-ui::after {
   background-color: currentColor;
-  -webkit-transform: translateX(24px);
-  transform: translateX(24px);
+  -webkit-transform: translateX(14px);
+  transform: translateX(14px);
 }

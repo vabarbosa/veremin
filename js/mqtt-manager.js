@@ -95,18 +95,20 @@ export class MqttClient {
     // Once a connection has been made, make a subscription and send a message.
     console.log('connection successful')
 
-    // if (this._loggingEnabled) {
-    //   const topic = this._eventTopic.replace('{event}', 'keypoints')
-    //   console.log(`Subscribing to ${topic}`)
-    //   this.client.subscribe(topic, {
-    //     onSuccess: () => {
-    //       console.log(`Successfully subscribed to ${topic}`)
-    //     },
-    //     onFailure: (response) => {
-    //       console.log(`Subscribe failed: ${response.errorMessage}`)
-    //     }
-    //   })
-    // }
+    if (this._loggingEnabled) {
+      const topic = this._eventTopic
+        .replace('evt/{event}', 'cmd/keypoints')
+        .replace('{event}', '#')
+      console.log(`Subscribing to ${topic}`)
+      this.client.subscribe(topic, {
+        onSuccess: () => {
+          console.log(`Successfully subscribed to ${topic}`)
+        },
+        onFailure: (response) => {
+          console.log(`Subscribe failed: ${response.errorMessage}`)
+        }
+      })
+    }
 
     this._initialConnectDone = true
   }
