@@ -37,7 +37,7 @@ export class MqttClient {
       // use the topic provided by user as is
       this._eventTopic = topic
     } else {
-      this._eventTopic = `/veremin/${topic}/{event}`
+      this._eventTopic = `veremin/${topic}/{event}`
     }
     console.log(`Event topic to publish to: ${this._eventTopic}`)
   }

@@ -50,7 +50,7 @@ export const guiState = {
     brokerURL: 'broker.mqttdashboard.com',
     brokerPort: 8000,
     clientId: '',
-    eventTopic: '/veremin/{event}',
+    eventTopic: 'veremin/{event}',
     cameraFOV: 120,
     distanceMult: 1,
     username: '',

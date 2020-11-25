@@ -98,7 +98,7 @@ export function drawWave (points, ctx) {
   ctx.moveTo(w, h)
   ctx.lineTo(0, h)
 
-  for (var p = 0; p < len; p++) {
+  for (let p = 0; p < len; p++) {
     const x = scale(p, 0, len - 1, 0, w)
     const y = scale(pts[p], -1, 1, h - m, m)
 
