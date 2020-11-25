@@ -22,23 +22,23 @@ const ZONEFACTOR = isMobile() ? 0.5 : 0.7
 let ZONEWIDTH = VIDEOWIDTH * 0.5
 let ZONEHEIGHT = VIDEOHEIGHT * ZONEFACTOR
 
-const LEFTWRIST = 9;
-const RIGHTWRIST = 10;
-const NOSE = 0;
-const LEFTSHOULDER = 5;
-const RIGHTSHOULDER = 6;
+const LEFTWRIST = 9
+const RIGHTWRIST = 10
+const NOSE = 0
+const LEFTSHOULDER = 5
+const RIGHTSHOULDER = 6
 
 let paused = false
 let posenetModel = null
 
-let mqttClient = null;
+let mqttClient = null
 
 let fpsTime = 0
 let fpsFrames = 0
 let fps = '--'
 const computeFPS = function () {
   fpsFrames++
-  let currentTime = (performance || Date).now()
+  const currentTime = (performance || Date).now()
 
   if (currentTime >= fpsTime + 1000) {
     fps = Math.round((fpsFrames * 1000) / (currentTime - fpsTime))
@@ -142,7 +142,9 @@ const detectPoseInRealTime = function (video) {
 
       const chordsInterval = guiState.chordIntervals === 'default' ? null : guiState.chordIntervals
       let chordsArray = []
-      if (chordsInterval && chordsInterval !== 'default' && chords.hasOwnProperty(chordsInterval)) {
+      if (chordsInterval &&
+          chordsInterval !== 'default' &&
+          Object.prototype.hasOwnProperty.call(chords, chordsInterval)) {
         chordsArray = chords[chordsInterval]
       }
 
@@ -172,14 +174,19 @@ const detectPoseInRealTime = function (video) {
 
       // If we don't have an mqtt client or if the gui says on, but the client isn't
       // enabled, as in we are transitioning into the on state, reset the mqtt clients params
-      if(!mqttClient || (guiState.mqtt.on && !mqttClient.getEnabled())) {
+      if (!mqttClient || (guiState.mqtt.on && !mqttClient.getEnabled())) {
         mqttClient = new MqttClient(
-          guiState.mqtt.brokerURL, 
+          guiState.mqtt.brokerURL,
           guiState.mqtt.brokerPort,
-          guiState.mqtt.clientId, 
-          guiState.mqtt.endpointVal, 
-          guiState.mqtt.on, 
-          guiState.mqtt.log)
+          {
+            username: guiState.mqtt.username,
+            password: guiState.mqtt.password,
+            clientId: guiState.mqtt.clientId,
+            eventTopic: guiState.mqtt.eventTopic,
+            enable: guiState.mqtt.on,
+            debug: guiState.mqtt.log
+          }
+        )
       }
 
       mqttClient.setMqttEnabled(guiState.mqtt.on)
@@ -210,19 +217,18 @@ const detectPoseInRealTime = function (video) {
 }
 
 /**
- * 
- * 
+ *
  * @param {Number} noseXPercent - The percentage of one half of the screen the user is to the left or the right
  * of the middle dividing line
  * This assumes that the FOV of the camera being used is 120 degrees. This is the standard angle for most cameras so it seems relatively safe.
  */
-const calculateAngle = function(noseXPercent) {
-  let data = {'rotateLeft': 0}
-  if(noseXPercent < 0) {
-    data = {'rotateRight': 0}
-    data['rotateRight'] = noseXPercent * -1  * guiState.mqtt.cameraFOV / 2; 
+const calculateAngle = function (noseXPercent) {
+  let data = { rotateLeft: 0 }
+  if (noseXPercent < 0) {
+    data = { rotateRight: 0 }
+    data.rotateRight = noseXPercent * -1 * guiState.mqtt.cameraFOV / 2
   } else {
-    data['rotateLeft'] = noseXPercent * guiState.mqtt.cameraFOV / 2; 
+    data.rotateLeft = noseXPercent * guiState.mqtt.cameraFOV / 2
   }
   return data
 }
@@ -233,9 +239,9 @@ const calculateAngle = function(noseXPercent) {
 const processPose = function (score, keypoints, minPartConfidence, topOffset, notesOffset, chordsArray, canvasCtx) {
   const leftWrist = keypoints[LEFTWRIST]
   const rightWrist = keypoints[RIGHTWRIST]
-  const nose = keypoints[NOSE];
-  const leftShoulder = keypoints[LEFTSHOULDER];
-  const rightShoulder = keypoints[RIGHTSHOULDER];
+  const nose = keypoints[NOSE]
+  const leftShoulder = keypoints[LEFTSHOULDER]
+  const rightShoulder = keypoints[RIGHTSHOULDER]
 
   if (leftWrist.score > minPartConfidence && rightWrist.score > minPartConfidence) {
     // Normalize keypoints to values between 0 and 1 (horizontally & vertically)
@@ -255,24 +261,24 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
     playNote(0, 0)
   }
 
-  if(guiState.mqtt.on) {
-    let userPosition = {};
+  if (guiState.mqtt.on) {
+    let userPosition = {}
     if (nose.score > minPartConfidence && leftShoulder.score > minPartConfidence && rightShoulder.score > minPartConfidence) {
       userPosition = normalizeUserPlacementPositions(leftShoulder, rightShoulder, nose, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
-      mqttClient.sendNose(userPosition['nose']);
-      mqttClient.sendAngle(calculateAngle(userPosition['nose']['x']))
-  
-        // .5 meters is 50%-52% of the screen
+      mqttClient.sendNose(userPosition.nose)
+      mqttClient.sendAngle(calculateAngle(userPosition.nose.x))
+
+      // .5 meters is 50%-52% of the screen
       // 1 meter is 27 -> 29% of the screen
       // 1.5 meters is 20->21%
       // 2 meters is 16 to 17%
       // 2.5 meters projection is 13 -> 15
       // This is likely overfitting in some capacity but it should be fine for our purposes
-      let estimatedDist = guiState.mqtt.distanceMult * 60.873 * (100 * userPosition['shoulderWidthPercent']) ** -1.225; 
-      mqttClient.sendEstDist(estimatedDist);
+      const estimatedDist = guiState.mqtt.distanceMult * 60.873 * (100 * userPosition.shoulderWidthPercent) ** -1.225
+      mqttClient.sendEstDist(estimatedDist)
     }
-  
-    mqttClient.sendKeypoints(keypoints);
+
+    mqttClient.sendKeypoints(keypoints)
   }
 
   if (guiState.canvas.showPoints) {
@@ -286,22 +292,24 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
 /**
  * Returns an object with the users position data for their nose, and shoulders between 0 and 1 such that we can calculate how the robot
  * watching for this data should move
- * 
+ *
  * @param {Object} leftShoulder  - posenet 'leftshoulder' keypoint corresponding to the users left shoulder
  * @param {Object} rightShoulder - posenet 'rightshoulder' keypoint corresponding to users right shoulder
  * @param {Object} nose - posenet 'nose' keypoints (corresponding to the user's nose)
  * @param {Object} topOffset - top edge (max position) for computing the edge of the screen
  * @param {Object} bottomOffset - bottom edge (min position) for computing jthe edge of the video screen
  */
-const normalizeUserPlacementPositions = function(leftShoulder, rightShoulder, nose, topOffset=ZONEOFFSET, bottomOffset=ZONEHEIGHT) {
-
+const normalizeUserPlacementPositions = function (
+  leftShoulder, rightShoulder, nose,
+  topOffset = ZONEOFFSET, bottomOffset = ZONEHEIGHT
+) {
   const leftEdge = ZONEOFFSET
   const verticalSplit = ZONEWIDTH
   const rightEdge = VIDEOWIDTH - ZONEOFFSET
-  const shoulderWidth = rightShoulder.position.x - leftShoulder.position.x;
+  const shoulderWidth = rightShoulder.position.x - leftShoulder.position.x
 
   // shoulderWidthPercent is the percentage of the horizontal screen width the users shoulders take up
-  let position = {
+  const position = {
     shoulderWidthPercent: 0,
     nose: {
       x: 0,
@@ -312,18 +320,20 @@ const normalizeUserPlacementPositions = function(leftShoulder, rightShoulder, no
   if (nose.position.x >= verticalSplit && nose.position.x <= rightEdge) {
     position.nose.x = computePercentage(nose.position.x, verticalSplit, rightEdge)
   } else if (nose.position.x <= verticalSplit && nose.position.x >= leftEdge) {
-    position.nose.x = computePercentage(nose.position.x, leftEdge, verticalSplit) - 1;
+    position.nose.x = computePercentage(nose.position.x, leftEdge, verticalSplit) - 1
   }
   if (nose.position.y <= ZONEHEIGHT && nose.position.y <= ZONEOFFSET) {
     position.nose.y = computePercentage(nose.position.y, ZONEHEIGHT, ZONEOFFSET)
   }
 
-  if (leftShoulder.position.x <= rightEdge && leftShoulder.position.x >= leftEdge &&
-      rightShoulder.position.x <= rightEdge && rightShoulder.position.x >= leftEdge) {
-        position.shoulderWidthPercent = computePercentage(shoulderWidth, 0, rightEdge - leftEdge) 
-      }
+  if (leftShoulder.position.x <= rightEdge &&
+      leftShoulder.position.x >= leftEdge &&
+      rightShoulder.position.x <= rightEdge &&
+      rightShoulder.position.x >= leftEdge) {
+    position.shoulderWidthPercent = computePercentage(shoulderWidth, 0, rightEdge - leftEdge)
+  }
 
-  return position;
+  return position
 }
 
 /**
@@ -343,7 +353,7 @@ const normalizeMusicPositions = function (leftWrist, rightWrist, topOffset = ZON
   const topEdge = topOffset
   const bottomEdge = bottomOffset
 
-  let position = {
+  const position = {
     right: {
       vertical: 0,
       horizontal: 0
@@ -351,7 +361,7 @@ const normalizeMusicPositions = function (leftWrist, rightWrist, topOffset = ZON
     left: {
       vertical: 0,
       horizontal: 0
-    },
+    }
   }
 
   if (rightZone.x >= verticalSplit && rightZone.x <= rightEdge) {

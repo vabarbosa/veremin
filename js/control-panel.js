@@ -8,7 +8,7 @@ const DEFAULTCHORDS = 'minor0'
 /**
  *  Defines control panel settings and default values
  * */
-export let guiState = {
+export const guiState = {
   algorithm: 'multi-pose',
   outputDevice: 'browser',
   chordIntervals: 'default',
@@ -44,15 +44,17 @@ export let guiState = {
     // Sends and reads mqtt data of all of the user positional data to the mqtt
     // end points defined in mqtt-manager.js
     on: false,
-    // doesn't do anything unless mqtt is on, 
+    // doesn't do anything unless mqtt is on,
     // this makes it so that it logs what it finds on the given mqtt end points
     log: true,
     brokerURL: 'broker.mqttdashboard.com',
     brokerPort: 8000,
-    clientId: 'UniqueVereminClientId',
-    endpointVal: 'UniqueEndpointVal',
+    clientId: '',
+    eventTopic: '/veremin/{event}',
     cameraFOV: 120,
-    distanceMult: 1
+    distanceMult: 1,
+    username: '',
+    password: ''
   }
 }
 
@@ -73,7 +75,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
 
   // Selector for pose detection algorithm.
   // Single-pose algorithm is faster and simpler when only one person to be in the frame. Multi-pose works for more than one person in the frame.
-  const algorithmController = gui.add(guiState, 'algorithm', [ 'multi-pose', 'single-pose' ])
+  const algorithmController = gui.add(guiState, 'algorithm', ['multi-pose', 'single-pose'])
 
   // Get available MIDI output devices
   const midiDevices = await getMidiDevices()
@@ -89,7 +91,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   // Get available chords
   const achords = Object.keys(chords)
   if (achords.length > 0) {
-    let defaultIndex = achords.indexOf(DEFAULTCHORDS)
+    const defaultIndex = achords.indexOf(DEFAULTCHORDS)
     guiState.chordIntervals = defaultIndex >= 0 ? achords[defaultIndex] : achords[0]
   }
 
@@ -117,7 +119,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   const browserPresetController = browserPreset.add(guiState.browser, 'preset', ['default'].concat(binst))
 
   // The input parameters have the most effect on accuracy and speed of the network
-  let input = gui.addFolder('Input')
+  const input = gui.addFolder('Input')
 
   // Architecture
   const architectureController = input.add(
@@ -131,7 +133,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   // the higher the value the faster the speed but lower the accuracy.
   input.add(guiState.input, 'outputStride', [8, 16, 32])
 
-  let single = gui.addFolder('Single Pose Detection')
+  const single = gui.addFolder('Single Pose Detection')
 
   // Pose confidence: the overall confidence in the estimation of a person's pose
   single.add(guiState.singlePoseDetection, 'minPoseConfidence', 0.0, 1.0)
@@ -139,7 +141,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   // Min part confidence: the confidence a particular estimated keypoint position is accurate
   single.add(guiState.singlePoseDetection, 'minPartConfidence', 0.0, 1.0)
 
-  let multi = gui.addFolder('Multi Pose Detection')
+  const multi = gui.addFolder('Multi Pose Detection')
   multi.add(guiState.multiPoseDetection, 'maxPoseDetections')
     .min(1)
     .max(10)
@@ -156,7 +158,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
 
   multi.open()
 
-  let canvas = gui.addFolder('Canvas')
+  const canvas = gui.addFolder('Canvas')
   canvas.add(guiState.canvas, 'showVideo')
   canvas.add(guiState.canvas, 'showSkeleton')
   canvas.add(guiState.canvas, 'showPoints')
@@ -164,15 +166,20 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   canvas.add(guiState.canvas, 'showWaveform')
   canvas.add(guiState.canvas, 'showFPS')
 
-  let mqtt = gui.addFolder('Mqtt')
+  const mqtt = gui.addFolder('MQTT')
   mqtt.add(guiState.mqtt, 'on')
   mqtt.add(guiState.mqtt, 'log')
   mqtt.add(guiState.mqtt, 'brokerURL')
   mqtt.add(guiState.mqtt, 'brokerPort')
+  mqtt.add(guiState.mqtt, 'username')
+  const pwd = mqtt.add(guiState.mqtt, 'password')
   mqtt.add(guiState.mqtt, 'clientId')
-  mqtt.add(guiState.mqtt, 'endpointVal')
+  mqtt.add(guiState.mqtt, 'eventTopic')
   mqtt.add(guiState.mqtt, 'cameraFOV')
   mqtt.add(guiState.mqtt, 'distanceMult', 0.25, 4.0)
+
+  const elt = pwd.domElement.firstChild
+  elt.type = 'password'
 
   architectureController.onChange(function (architecture) {
     guiState.changeToArchitecture = architecture

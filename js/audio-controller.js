@@ -8,7 +8,7 @@ const NOTEON = (0x9 << 4) + (CHANNEL - 1) // equals 144 (with channel = 1)
 const FFTSIZE = 512
 
 let selectedMidiDevice = null
-let midiOutputs = []
+const midiOutputs = []
 let webAudioPlaying = false
 
 let audioCtx = null
@@ -214,7 +214,7 @@ export function playNote (value, volume, duration = 300, chordsArray) {
     value = value < 0 ? 0 : (value > 1 ? 1 : value)
     volume = volume < 0 ? 0 : (volume > 1 ? 1 : volume)
 
-    let midiNotes = computeNote(value, 0, 1, chordsArray)
+    const midiNotes = computeNote(value, 0, 1, chordsArray)
     let v = volume
     let playerFunction
 
@@ -246,7 +246,7 @@ export function getMidiDevices () {
       .then(function (access) {
         console.log('MIDIAccess', access)
 
-        let midilist = Array.from(access.outputs.values())
+        const midilist = Array.from(access.outputs.values())
         midilist.forEach(e => {
           midiOutputs[`${e.name} (${e.manufacturer})`] = e
         })

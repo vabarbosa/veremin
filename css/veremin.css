@@ -313,8 +313,19 @@ footer {
   background: var(--primary-back) !important;
 }
 
-.dg .cr.number input[type=text] {
+.dg .cr.number input[type=text],
+.dg .cr.string input[type="text"],
+.dg .cr.string input[type="password"] {
   color: var(--primary-back) !important;
+
+  background: #303030;
+  outline: none;
+
+  border: 0;
+  margin-top: 4px;
+  padding: 3px;
+  width: 100%;
+  float: right;
 }
 
 .toggle-btn {

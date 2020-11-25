@@ -5,92 +5,137 @@ export class MqttClient {
    * A constructor for the MQTT class that will handle all of this logic
    * @param {String} brokerUrl - The url to the broker that will push incoming messages to subscribers
    * @param {String} clientId - The unique id for this client
-   * @param {String} uniqueEndpointVal - To prevent collisions of multiple people running this code at the same time
-   *    Users can create a unique id so their endpoint routes are different from others
-   * @param {Boolean} enabled - Whether or not mqtt is enabled at all. If MQTT isn't enabled, then this code doesn't do much.
-   * @param {Boolean} shouldLog - Logs the messages recieved to the new box in the settings sidebar
+   * @param {Object} options - Configuration options for the MQTT client
    */
-  constructor(brokerUrl, brokerPort, clientId, uniqueEndpointVal, enabled, shouldLog) {
-    this.client = new Paho.MQTT.Client(brokerUrl, brokerPort, clientId);
-    console.log('constructor for mqtt: ' + brokerUrl + '\n' + clientId + '\n' + uniqueEndpointVal + '\n' + enabled + '\n' + shouldLog)
-    this._keypointsTopic = '/veremin/' + uniqueEndpointVal +'/keypoints/';
-    this._noseTopic = '/veremin/' + uniqueEndpointVal +'/nose/';
-    this._estDistTopic = '/veremin/' + uniqueEndpointVal + '/distance/';
-    this._angleTopic = '/veremin/' + uniqueEndpointVal + '/angle/'
-    this.subscriptionUrl = '/veremin/' + uniqueEndpointVal + '/#'
-    this._initialConnectDone = false;
+  constructor (brokerUrl, brokerPort, options = {}) {
+    const clientId = options.clientId || `veremin_${(new Date()).getTime()}`
+    console.log(`MQTT client for ${brokerUrl}:${brokerPort} (id: ${clientId})`)
 
-    this._enabled = enabled;
-    if (enabled) {
-      this._startMqtt()
-    }
-    this._loggingEnabled = shouldLog;
+    this.client = new Paho.Client(brokerUrl, brokerPort, clientId)
+
+    // keypoints of interest
+    this.KEYPOINTS = [
+      'nose',
+      'leftEye', 'rightEye',
+      'leftShoulder', 'rightShoulder',
+      'leftWrist', 'rightWrist'
+    ]
+
+    this._username = options.username
+    this._password = options.password
+
+    this.setEventTopic(options.eventTopic)
+    this.setMqttEnabled(options.enable)
+    this.setShouldLog(options.debug)
   }
 
-  setMqttEnabled(enabled) {
+  setEventTopic (topic) {
+    if (!topic) {
+      // default to watson iot platform (topic) format
+      this._eventTopic = 'iot-2/evt/{event}/fmt/json'
+    } else if (topic.indexOf('/') > -1) {
+      // use the topic provided by user as is
+      this._eventTopic = topic
+    } else {
+      this._eventTopic = `/veremin/${topic}/{event}`
+    }
+    console.log(`Event topic to publish to: ${this._eventTopic}`)
+  }
+
+  setMqttEnabled (enabled) {
     if (enabled && !this._enabled) {
-      this._enabled = true;
+      this._enabled = true
       this._startMqtt()
-    } else if(!enabled && this._enabled) {
-      this._enabled = false;
-      this._stopMqtt();
+    } else if (!enabled && this._enabled) {
+      this._enabled = false
+      this._stopMqtt()
     }
   }
 
-  setShouldLog(enabled) {
-    this._loggingEnabled = enabled;
+  setShouldLog (enabled) {
+    this._loggingEnabled = enabled
   }
 
-  _startMqtt() {
-    this._initialConnectDone = false;
+  _startMqtt () {
+    this._initialConnectDone = false
     // set callback handlers
-    this.client.onConnectionLost = (responseObject) => { 
-      this._onConnectionLost(responseObject) 
-    };
-    this.client.onMessageArrived = (message) => { 
-      this._onMessageArrived(message) 
-    };
-  
+    this.client.onConnectionLost = (responseObject) => {
+      this._onConnectionLost(responseObject)
+    }
+    this.client.onMessageArrived = (message) => {
+      this._onMessageArrived(message)
+    }
+
+    const options = {
+      onSuccess: () => { this._onConnect() },
+      onFailure: (message) => {
+        console.error(`Connection failed: ${message.errorMessage}`)
+        this._initialConnectDone = false
+      }
+    }
+
+    if (this._username && this._password) {
+      options.userName = this._username
+      options.password = this._password
+      options.useSSL = true
+
+      console.log(`Connecting with credentials for '${this._username}'`)
+    }
+
     // connect the client
-    this.client.connect({onSuccess: () => {this._onConnect()}});
+    this.client.connect(options)
   }
-  
-  _stopMqtt() {
+
+  _stopMqtt () {
     this.client.disconnect()
   }
 
   // called when the client connects
-  _onConnect() {
+  _onConnect () {
     // Once a connection has been made, make a subscription and send a message.
-    console.log("onConnect");
-    console.log("subscribed to: " + this.subscriptionUrl)
-    this.client.subscribe(this.subscriptionUrl);
-    this._initialConnectDone = true;
+    console.log('connection successful')
+
+    // if (this._loggingEnabled) {
+    //   const topic = this._eventTopic.replace('{event}', 'keypoints')
+    //   console.log(`Subscribing to ${topic}`)
+    //   this.client.subscribe(topic, {
+    //     onSuccess: () => {
+    //       console.log(`Successfully subscribed to ${topic}`)
+    //     },
+    //     onFailure: (response) => {
+    //       console.log(`Subscribe failed: ${response.errorMessage}`)
+    //     }
+    //   })
+    // }
+
+    this._initialConnectDone = true
   }
 
   // called when the client loses its connection
-  _onConnectionLost(responseObject) {
+  _onConnectionLost (responseObject) {
     if (responseObject.errorCode !== 0) {
-      console.log("onConnectionLost:"+responseObject.errorMessage);
+      console.log(`Connection lost: ${responseObject.errorMessage}`)
+    } else {
+      console.log('Disconnected')
     }
-    this._initialConnectDone = false;
+    this._initialConnectDone = false
   }
 
-    /**
+  /**
    * Sends an mqtt message with a given topic and data once the data is verified to have a value
    * and the connection is checked to be up. Reconnects if the connection is not up
-   * 
+   *
    * @param {String} topic - The topic that the message is published to on mqtt
    * @param {Object} data  - The data that is being published
    */
-  _sendMqttMessage(topic, data) {
-    if(!data) {
-      console.log('Data is falsey, not sending it:');
-      console.log(JSON.stringify(data));
-      return;
+  _sendMqttMessage (topic, data) {
+    if (!data) {
+      console.log('Data is falsey, not sending it:')
+      console.log(JSON.stringify(data))
+      return
     }
     if (!this._initialConnectDone) {
-      return;
+      return
     }
     // if (!client.connected) {
     //   // Multiple reconnect events firing at once was a problem. This check
@@ -98,46 +143,53 @@ export class MqttClient {
     //   // Dropping messages while we don't have a connection in this use case should be fine.
     //   if(!reconnecting) {
     //     reconnect().then(function() {
-    //       client.publish(topic, JSON.stringify(data), {}, console.log);
-    //     });
+    //       client.publish(topic, JSON.stringify(data), {}, console.log)
+    //     })
     //   }
     // } else {
-      let dataStr = JSON.stringify(data)
-      dataStr = dataStr.replaceAll(/\.[0-9]+/g, this._replacer)
-      var message = new Paho.MQTT.Message(dataStr);
-      message.destinationName = topic;
-      this.client.send(message);
+    const dataStr = JSON.stringify(data).replaceAll(/\.[0-9]+/g, this._replacer)
+    const message = new Paho.Message(dataStr)
+    message.destinationName = topic
+    this.client.send(message)
     // }
   }
 
-  _replacer(match) {
+  _replacer (match) {
     return match.substr(0, 3)
   }
 
-  sendNose(data) {
-    this._sendMqttMessage(this._noseTopic, data);
+  sendNose (data) {
+    const topic = this._eventTopic.replace('{event}', 'nose')
+    this._sendMqttMessage(topic, data)
   }
 
-  sendEstDist(data) {
-    this._sendMqttMessage(this._estDistTopic, data);
+  sendEstDist (data) {
+    const topic = this._eventTopic.replace('{event}', 'distance')
+    this._sendMqttMessage(topic, data)
   }
 
-  sendKeypoints(data) {
-    this._sendMqttMessage(this._keypointsTopic, data)
+  sendKeypoints (data) {
+    const topic = this._eventTopic.replace('{event}', 'keypoints')
+    const filteredData = data.filter((d) => {
+      // only send keypoints of interest (to minimize amount of data sent)
+      return this.KEYPOINTS.includes(d.part)
+    })
+    this._sendMqttMessage(topic, filteredData)
   }
 
-  sendAngle(data) {
-    this._sendMqttMessage(this._angleTopic, data)
+  sendAngle (data) {
+    const topic = this._eventTopic.replace('{event}', 'angle')
+    this._sendMqttMessage(topic, data)
   }
 
   // called when a message arrives
-  _onMessageArrived(message) {
-    if(this._loggingEnabled) {
-      console.log("onMessageArrived TOPIC: " + message.destinationName + '\nCONTENT: ' + message.payloadString);
+  _onMessageArrived (message) {
+    if (this._loggingEnabled) {
+      console.log('onMessageArrived TOPIC: ' + message.destinationName + '\nCONTENT: ' + message.payloadString)
     }
   }
 
-  getEnabled() {
+  getEnabled () {
     return this._enabled
   }
-};
+}

@@ -34,9 +34,9 @@ async function setupCamera (domNode = 'video', mobile) {
   const size = preferredVideoSize(null, mobile)
   video.width = size.width
   video.height = size.height
-  let constraint = {
-    'audio': false,
-    'video': {
+  const constraint = {
+    audio: false,
+    video: {
       facingMode: 'user'
     }
   }
@@ -75,13 +75,13 @@ export const preferredVideoSize = function (video, mobile) {
     const videoRatio = vw / vh
 
     if (w / vw < h / vh) {
-      let width = w < 400 ? w : (w < 600 ? w * 0.85 : w * 0.7)
+      const width = w < 400 ? w : (w < 600 ? w * 0.85 : w * 0.7)
       size = {
         width: width,
         height: width / videoRatio
       }
     } else {
-      let height = h < 300 ? h : (h < 450 ? h * 0.85 : h * 0.7)
+      const height = h < 300 ? h : (h < 450 ? h * 0.85 : h * 0.7)
       size = {
         height: height,
         width: height * videoRatio
