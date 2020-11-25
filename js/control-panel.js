@@ -71,9 +71,7 @@ const storeState = () => {
 const loadState = () => {
   const savedStateStr = localStorage.getItem(storageKey())
   const savedStateObj = savedStateStr ? JSON.parse(savedStateStr) : {}
-  console.log(guiState)
   guiState = Object.assign({}, guiState, savedStateObj)
-  console.log(guiState)
 }
 
 /**
@@ -196,15 +194,18 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   mqtt.add(guiState.mqtt, 'log')
   mqtt.add(guiState.mqtt, 'brokerURL')
   mqtt.add(guiState.mqtt, 'brokerPort')
-  mqtt.add(guiState.mqtt, 'username')
+  const un = mqtt.add(guiState.mqtt, 'username')
   const pwd = mqtt.add(guiState.mqtt, 'password')
   mqtt.add(guiState.mqtt, 'clientId')
   mqtt.add(guiState.mqtt, 'eventTopic')
   mqtt.add(guiState.mqtt, 'cameraFOV')
   mqtt.add(guiState.mqtt, 'distanceMult', 0.25, 4.0)
 
-  const elt = pwd.domElement.firstChild
-  elt.type = 'password'
+  const unElt = un.domElement.firstChild
+  unElt.name = 'username'
+  const pwdElt = pwd.domElement.firstChild
+  pwdElt.name = 'password'
+  pwdElt.type = 'password'
 
   architectureController.onChange(function (architecture) {
     guiState.changeToArchitecture = architecture
