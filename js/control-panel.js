@@ -1,4 +1,4 @@
-/* global dat */
+/* global dat, localStorage, location */
 
 import { getMidiDevices, setPreferredDevice, getBrowserPresets, setPreferredPreset } from './audio-controller.js'
 import { chords } from './chord-intervals.js'
@@ -8,7 +8,7 @@ const DEFAULTCHORDS = 'minor0'
 /**
  *  Defines control panel settings and default values
  * */
-export const guiState = {
+export let guiState = {
   algorithm: 'multi-pose',
   outputDevice: 'browser',
   chordIntervals: 'default',
@@ -58,10 +58,35 @@ export const guiState = {
   }
 }
 
+const storageKey = () => {
+  return `${location.href}/veremin`
+}
+
+const storeState = () => {
+  const stateToSave = Object.assign({}, guiState)
+  // do not store password
+  stateToSave.mqtt.password = ''
+  localStorage.setItem(storageKey(), JSON.stringify(stateToSave))
+}
+const loadState = () => {
+  const savedStateStr = localStorage.getItem(storageKey())
+  const savedStateObj = savedStateStr ? JSON.parse(savedStateStr) : {}
+  console.log(guiState)
+  guiState = Object.assign({}, guiState, savedStateObj)
+  console.log(guiState)
+}
+
 /**
  * Sets up control panel on the top-right of the window
  */
 export async function setupGui (cameras, mobile, domNode = 'control-panel') {
+  if (typeof (Storage) !== 'undefined') {
+    window.onunload = storeState
+    loadState()
+  } else {
+    console.log('Config state will not be stored')
+  }
+
   if (cameras.length > 0) {
     guiState.camera = cameras[0].deviceId
   }

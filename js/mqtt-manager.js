@@ -8,7 +8,7 @@ export class MqttClient {
    * @param {Object} options - Configuration options for the MQTT client
    */
   constructor (brokerUrl, brokerPort, options = {}) {
-    const clientId = options.clientId || `veremin_${(new Date()).getTime()}`
+    const clientId = options.clientId || `veremin_${Math.floor((1 + Math.random()) * 0x100000).toString(16)}`
     console.log(`MQTT client for ${brokerUrl}:${brokerPort} (id: ${clientId})`)
 
     this.client = new Paho.Client(brokerUrl, brokerPort, clientId)
@@ -33,6 +33,7 @@ export class MqttClient {
     if (!topic) {
       // default to watson iot platform (topic) format
       this._eventTopic = 'iot-2/evt/{event}/fmt/json'
+      // this._eventTopic = 'iot-2/type/veremin/id/veremin-ibm-cloud/evt/{event}/fmt/json'
     } else if (topic.indexOf('/') > -1) {
       // use the topic provided by user as is
       this._eventTopic = topic
@@ -97,8 +98,8 @@ export class MqttClient {
 
     if (this._loggingEnabled) {
       const topic = this._eventTopic
-        .replace('evt/{event}', 'cmd/keypoints')
-        .replace('{event}', '#')
+        .replace('evt/{event}', 'cmd/+')
+        .replace('{event}', '+')
       console.log(`Subscribing to ${topic}`)
       this.client.subscribe(topic, {
         onSuccess: () => {
