@@ -59,7 +59,7 @@ export let guiState = {
 }
 
 const storageKey = () => {
-  return `${location.href}/veremin`
+  return `[${location.href.replace(location.protocol, 'veremin:')}]`
 }
 
 const storeState = () => {
