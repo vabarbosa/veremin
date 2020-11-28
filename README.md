@@ -31,7 +31,9 @@ If you would like to use the pose estimation to control another device you can t
 - [Web MIDI API](https://www.w3.org/TR/webmidi) - an API supporting the MIDI protocol, enabling web applications to enumerate and select MIDI input and output devices on the client system and send and receive MIDI messages
 - [Web Audio API](https://www.w3.org/TR/webaudio) - a high-level Web API for processing and synthesizing audio in web applications
 - [Tone.js](https://tonejs.github.io/) - a framework for creating interactive music in the browser
-- [Mqtt](https://www.eclipse.org/paho/index.php?page=clients/js/index.php) - A IOT communication framework for publisher/subscriber based communication for publishing data
+- [MQTT](https://mqtt.org/) - a lightweight publish/subscribe messaging protocol for communicating with IoT devices
+- [WebSocket API](https://www.w3.org/TR/websockets/) - an interface for sending messages to a server and receive event-driven responses without having to poll the server
+- [Paho JavaScript Client](https://www.eclipse.org/paho/index.php?page=clients/js/index.php) - MQTT client library written in JavaScript that uses WebSockets to connect to an MQTT Broker
 
 
 ## Live demo
@@ -136,6 +138,8 @@ In addition, if it supports the [Web MIDI API](https://caniuse.com/#feat=midi), 
 
 If your browser does not support the Web MIDI API or no (hardware or software) synthesizer is detected, the app defaults to using the Web Audio API to generate tones in the browser.
 
+Publishing to an MQTT broker over Websockets is also possible. You can configure the broker to send messages to. Some keypoints returned by the PoseNet model along with some additional computed values (i.e., distance, angle, etc.) are sent to the broker.
+
 Open your browser and go to the app URL. Depending on your browser, you may need to access the app using the **`https`** protocol instead of the **`http`**. You may also have to accept the browser's prompt to allow access to the web camera. Once access is allowed, the PoseNet model gets loaded (it may take a few seconds).
 
 After the model is loaded, the video stream from the web camera will appear and include an overlay with skeletal and joint information detected by PoseNet. The overlay will also include two adjacent zones/boxes. When your wrists are detected within each of the zones, you should here some sound.
@@ -143,7 +147,7 @@ After the model is loaded, the video stream from the web camera will appear and 
 - Move your right hand/arm up and down (in the right zone) to generate different notes
 - Move your left hand/arm left and right (in the left zone) to adjust the velocity of the note.
 
-Click on the Controls icon (top right) to open the control panel. In the control panel you are able to change MIDI devices (if more than one is connected), configure PoseNet settings, set what is shown in the overlay, and configure additional options. More information about the control panel options is available [here](https://github.com/vabarbosa/veremin/blob/master/CONTROLPANEL.md).
+Click on the Controls icon (top right) to open the control panel. In the control panel you are able to change MIDI devices (if more than one is connected), configure PoseNet settings, set what is shown in the overlay, enable MQTT, and configure additional options. More information about the control panel options is available [here](https://github.com/vabarbosa/veremin/blob/master/CONTROLPANEL.md).
 
 ## Links
 
@@ -151,6 +155,7 @@ Click on the Controls icon (top right) to open the control panel. In the control
  - [Real-time Human Pose Estimation in the Browser with TensorFlow.js](https://medium.com/tensorflow/real-time-human-pose-estimation-in-the-browser-with-tensorflow-js-7dd0bc881cd5)
  - [Playing with MIDI in JavaScript](https://medium.com/swinginc/playing-with-midi-in-javascript-b6999f2913c3)
  - [Introduction to Web Audio API](https://css-tricks.com/introduction-web-audio-api)
+ - [Getting Started with MQTT](https://mqtt.org/getting-started/)
  - [IBM Cloud](https://console.bluemix.net/)
  - [Getting started with the IBM Cloud CLI](https://console.bluemix.net/docs/cli/index.html#overview)
  - [Prepare the app for deployment - IBM Cloud](https://console.bluemix.net/docs/runtimes/nodejs/getting-started.html#prepare)

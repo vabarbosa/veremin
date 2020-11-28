@@ -56,3 +56,19 @@ Below options are available for configuration in the control panel:
 | showPoints | `true` | Whether or not to show the joint information detected by PoseNet. |
 | showZones | `true` | Whether or not to show the left and right activation zones. |
 | showWaveform | `true` | Whether or not to show the sound waveform in the background. |
+
+### MQTT
+
+| Option | Default | Description |
+|---|---|---|
+| on | `false` | Whether or not to publish position data to configured MQTT broker. |
+| secureWebsocket | `true` | Whether or not to try to connect to MQTT broker using a secure Websocket connection. |
+| brokerUrl | `mqtt.eclipse.org` | MQTT broker URL. |
+| brokerPort | `443` | MQTT broker port. |
+| eventTopic | `veremin/{event}` | The topic to use to publish MQTT messages. If the topic consists of the string `{event}`, it will be replaced with the appropriate message event type (i.e., `nose`, `angle`, etc.). |
+| clientId | _blank_ | Unique ID to use to identify the client when sending messages. If left blank a unique ID is generated and used. |
+| username | _blank_ | The username to use when connecting the MQTT broker (if the broker requires credentials). |
+| password | _blank_ | The password to use when connecting the MQTT broker (if the broker requires credentials). |
+| cameraFOV | `120` | Estimated field of view of the web camera being used. |
+| distanceMult | `1` | What scale to use when trying to determine distances. |
+| log | `false` | Whether or not to also subscribe to the eventTopic and log on incoming messages. |
