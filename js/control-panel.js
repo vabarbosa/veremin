@@ -55,7 +55,7 @@ export let guiState = {
     distanceMult: 1,
     // doesn't do anything unless mqtt is on,
     // this makes it so that it logs what it finds on the given mqtt end points
-    log: true
+    log: false
   }
 }
 
