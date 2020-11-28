@@ -41,20 +41,18 @@ export let guiState = {
     showFPS: false
   },
   mqtt: {
-    // Sends and reads mqtt data of all of the user positional data to the mqtt
-    // end points defined in mqtt-manager.js
+    // Turn on publishing of user position data via MQTT
     on: false,
+    secureWebsocket: true,
     brokerURL: 'mqtt.eclipse.org',
     brokerPort: 443,
-    secureWebsocket: true,
-    clientId: '',
     eventTopic: 'veremin/{event}',
+    clientId: '',
     username: '',
     password: '',
     cameraFOV: 120,
     distanceMult: 1,
-    // doesn't do anything unless mqtt is on,
-    // this makes it so that it logs what it finds on the given mqtt end points
+    // If MQTT is enabled, subscribe to the topic and log all incoming messages
     log: false
   }
 }
@@ -215,6 +213,8 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
   const pwdElt = pwd.domElement.firstChild
   pwdElt.name = 'password'
   pwdElt.type = 'password'
+
+  mqtt.open()
 
   architectureController.onChange(function (architecture) {
     guiState.changeToArchitecture = architecture

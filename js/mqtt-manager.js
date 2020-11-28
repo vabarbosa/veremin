@@ -26,15 +26,14 @@ export class MqttClient {
     this._secureWebsocket = options.secureWebsocket
 
     this.setEventTopic(options.eventTopic)
-    this.setMqttEnabled(options.enable)
-    this.setShouldLog(options.debug)
+    this.setMqttEnabled(options.on)
+    this.setShouldLog(options.log)
   }
 
   setEventTopic (topic) {
     if (!topic) {
       // default to watson iot platform (topic) format
       this._eventTopic = 'iot-2/evt/{event}/fmt/json'
-      // this._eventTopic = 'iot-2/type/veremin/id/veremin-ibm-cloud/evt/{event}/fmt/json'
     } else if (topic.indexOf('/') > -1) {
       // use the topic provided by user as is
       this._eventTopic = topic
@@ -100,6 +99,7 @@ export class MqttClient {
     // Once a connection has been made, make a subscription and send a message.
     console.log('connection successful')
 
+    // TODO: 'iot-2/type/{type}/id/{deviceId}/evt/{event}/fmt/json'
     if (this._loggingEnabled && !this._eventTopic.startsWith('iot-2/evt/')) {
       const topic = this._eventTopic.replace('{event}', '+')
       console.log(`Subscribing to ${topic}`)
@@ -191,7 +191,7 @@ export class MqttClient {
   // called when a message arrives
   _onMessageArrived (message) {
     if (this._loggingEnabled) {
-      console.log('onMessageArrived TOPIC: ' + message.destinationName + '\nCONTENT: ' + message.payloadString)
+      console.log(`onMessageArrived (Topic: ${message.destinationName})\n${message.payloadString}`)
     }
   }
 

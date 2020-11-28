@@ -178,20 +178,12 @@ const detectPoseInRealTime = function (video) {
         mqttClient = new MqttClient(
           guiState.mqtt.brokerURL,
           guiState.mqtt.brokerPort,
-          {
-            username: guiState.mqtt.username,
-            password: guiState.mqtt.password,
-            clientId: guiState.mqtt.clientId,
-            eventTopic: guiState.mqtt.eventTopic,
-            enable: guiState.mqtt.on,
-            debug: guiState.mqtt.log,
-            secureWebsocket: guiState.mqtt.secureWebsocket
-          }
+          guiState.mqtt
         )
       }
 
-      mqttClient.setMqttEnabled(guiState.mqtt.on)
       mqttClient.setShouldLog(guiState.mqtt.log)
+      mqttClient.setMqttEnabled(guiState.mqtt.on)
 
       // Loop through each pose (i.e. person) detected
       poses.forEach(({ score, keypoints }) => {
