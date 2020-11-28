@@ -46,7 +46,7 @@ export let guiState = {
     on: false,
     brokerURL: 'mqtt.eclipse.org',
     brokerPort: 443,
-    useSSL: true,
+    secureWebsocket: true,
     clientId: '',
     eventTopic: 'veremin/{event}',
     username: '',
@@ -72,7 +72,17 @@ const storeState = () => {
 const loadState = () => {
   const savedStateStr = localStorage.getItem(storageKey())
   const savedStateObj = savedStateStr ? JSON.parse(savedStateStr) : {}
-  guiState = Object.assign({}, guiState, savedStateObj)
+  console.log(guiState)
+  console.log(savedStateObj)
+  guiState = merge(guiState, savedStateObj)
+  console.log(guiState)
+}
+const merge = (target, source) => {
+  for (const key of Object.keys(source)) {
+    if (source[key] instanceof Object) Object.assign(source[key], merge(target[key], source[key]))
+  }
+  Object.assign(target || {}, source)
+  return target
 }
 
 /**
@@ -192,7 +202,7 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
 
   const mqtt = gui.addFolder('MQTT')
   mqtt.add(guiState.mqtt, 'on')
-  mqtt.add(guiState.mqtt, 'useSSL')
+  mqtt.add(guiState.mqtt, 'secureWebsocket')
   mqtt.add(guiState.mqtt, 'brokerURL')
   mqtt.add(guiState.mqtt, 'brokerPort')
   mqtt.add(guiState.mqtt, 'eventTopic')

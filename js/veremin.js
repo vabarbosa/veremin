@@ -185,7 +185,7 @@ const detectPoseInRealTime = function (video) {
             eventTopic: guiState.mqtt.eventTopic,
             enable: guiState.mqtt.on,
             debug: guiState.mqtt.log,
-            useSSL: guiState.mqtt.useSSL
+            secureWebsocket: guiState.mqtt.secureWebsocket
           }
         )
       }

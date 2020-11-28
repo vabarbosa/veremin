@@ -23,7 +23,7 @@ export class MqttClient {
 
     this._username = options.username
     this._password = options.password
-    this._useSSL = options.useSSL
+    this._secureWebsocket = options.secureWebsocket
 
     this.setEventTopic(options.eventTopic)
     this.setMqttEnabled(options.enable)
@@ -82,8 +82,8 @@ export class MqttClient {
       console.log(`Connecting with credentials for '${this._username}'`)
     }
 
-    if (this._useSSL) {
-      options.useSSL = true
+    if (this._secureWebsocket) {
+      options.secureWebsocket = true
       console.log('Using TLS connection')
     }
 
