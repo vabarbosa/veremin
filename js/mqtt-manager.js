@@ -23,6 +23,7 @@ export class MqttClient {
 
     this._username = options.username
     this._password = options.password
+    this._useSSL = options.useSSL
 
     this.setEventTopic(options.eventTopic)
     this.setMqttEnabled(options.enable)
@@ -75,12 +76,15 @@ export class MqttClient {
       }
     }
 
-    if (this._username && this._password) {
+    if (this._username || this._password) {
       options.userName = this._username
       options.password = this._password
-      options.useSSL = true
-
       console.log(`Connecting with credentials for '${this._username}'`)
+    }
+
+    if (this._useSSL) {
+      options.useSSL = true
+      console.log('Using TLS connection')
     }
 
     // connect the client
@@ -96,11 +100,10 @@ export class MqttClient {
     // Once a connection has been made, make a subscription and send a message.
     console.log('connection successful')
 
-    if (this._loggingEnabled) {
-      const topic = this._eventTopic
-        .replace('evt/{event}', 'cmd/+')
-        .replace('{event}', '+')
+    if (this._loggingEnabled && !this._eventTopic.startsWith('iot-2/evt/')) {
+      const topic = this._eventTopic.replace('{event}', '+')
       console.log(`Subscribing to ${topic}`)
+
       this.client.subscribe(topic, {
         onSuccess: () => {
           console.log(`Successfully subscribed to ${topic}`)

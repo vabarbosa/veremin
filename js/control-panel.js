@@ -44,17 +44,18 @@ export let guiState = {
     // Sends and reads mqtt data of all of the user positional data to the mqtt
     // end points defined in mqtt-manager.js
     on: false,
-    // doesn't do anything unless mqtt is on,
-    // this makes it so that it logs what it finds on the given mqtt end points
-    log: true,
-    brokerURL: 'broker.mqttdashboard.com',
-    brokerPort: 8000,
+    brokerURL: 'mqtt.eclipse.org',
+    brokerPort: 443,
+    useSSL: true,
     clientId: '',
     eventTopic: 'veremin/{event}',
+    username: '',
+    password: '',
     cameraFOV: 120,
     distanceMult: 1,
-    username: '',
-    password: ''
+    // doesn't do anything unless mqtt is on,
+    // this makes it so that it logs what it finds on the given mqtt end points
+    log: true
   }
 }
 
@@ -191,15 +192,16 @@ export async function setupGui (cameras, mobile, domNode = 'control-panel') {
 
   const mqtt = gui.addFolder('MQTT')
   mqtt.add(guiState.mqtt, 'on')
-  mqtt.add(guiState.mqtt, 'log')
+  mqtt.add(guiState.mqtt, 'useSSL')
   mqtt.add(guiState.mqtt, 'brokerURL')
   mqtt.add(guiState.mqtt, 'brokerPort')
+  mqtt.add(guiState.mqtt, 'eventTopic')
+  mqtt.add(guiState.mqtt, 'clientId')
   const un = mqtt.add(guiState.mqtt, 'username')
   const pwd = mqtt.add(guiState.mqtt, 'password')
-  mqtt.add(guiState.mqtt, 'clientId')
-  mqtt.add(guiState.mqtt, 'eventTopic')
   mqtt.add(guiState.mqtt, 'cameraFOV')
   mqtt.add(guiState.mqtt, 'distanceMult', 0.25, 4.0)
+  mqtt.add(guiState.mqtt, 'log')
 
   const unElt = un.domElement.firstChild
   unElt.name = 'username'
