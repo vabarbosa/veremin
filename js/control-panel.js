@@ -72,10 +72,7 @@ const storeState = () => {
 const loadState = () => {
   const savedStateStr = localStorage.getItem(storageKey())
   const savedStateObj = savedStateStr ? JSON.parse(savedStateStr) : {}
-  console.log(guiState)
-  console.log(savedStateObj)
   guiState = merge(guiState, savedStateObj)
-  console.log(guiState)
 }
 const merge = (target, source) => {
   for (const key of Object.keys(source)) {
