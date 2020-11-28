@@ -47,6 +47,7 @@ header > span:first-of-type {
 
 #v-status {
   color: var(--alert);
+  float: right;
 }
 
 #btn-grp {
