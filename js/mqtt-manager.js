@@ -83,7 +83,7 @@ export class MqttClient {
     }
 
     if (this._secureWebsocket) {
-      options.secureWebsocket = true
+      options.useSSL = true
       console.log('Using TLS connection')
     }
 
