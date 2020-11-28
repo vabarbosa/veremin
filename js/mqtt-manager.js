@@ -183,6 +183,11 @@ export class MqttClient {
     this._sendMqttMessage(topic, filteredData)
   }
 
+  sendRobot(data) {
+    const topic = this._eventTopic.replace('{event}', 'robot')
+    this._sendMqttMessage(topic, data)
+  }
+
   sendAngle (data) {
     const topic = this._eventTopic.replace('{event}', 'angle')
     this._sendMqttMessage(topic, data)

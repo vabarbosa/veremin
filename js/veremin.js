@@ -259,7 +259,8 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
     if (nose.score > minPartConfidence && leftShoulder.score > minPartConfidence && rightShoulder.score > minPartConfidence) {
       userPosition = normalizeUserPlacementPositions(leftShoulder, rightShoulder, nose, (topOffset + notesOffset), (ZONEHEIGHT + notesOffset))
       mqttClient.sendNose(userPosition.nose)
-      mqttClient.sendAngle(calculateAngle(userPosition.nose.x))
+      const userAngle = calculateAngle(userPosition.nose.x)
+      mqttClient.sendAngle(userAngle)
 
       // .5 meters is 50%-52% of the screen
       // 1 meter is 27 -> 29% of the screen
@@ -269,6 +270,26 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
       // This is likely overfitting in some capacity but it should be fine for our purposes
       const estimatedDist = guiState.mqtt.distanceMult * 60.873 * (100 * userPosition.shoulderWidthPercent) ** -1.225
       mqttClient.sendEstDist(estimatedDist)
+      const estWristDelta = {
+        left: {
+          x: keypoints[LEFTWRIST].position.x - keypoints[LEFTSHOULDER].position.x,
+          y: keypoints[LEFTWRIST].position.y - keypoints[LEFTSHOULDER].position.y,
+          conf: keypoints[LEFTWRIST].score
+        }, 
+         right: {
+          x: keypoints[RIGHTSHOULDER].position.x - keypoints[RIGHTSHOULDER].position.x,
+          y: keypoints[RIGHTSHOULDER].position.y - keypoints[RIGHTSHOULDER].position.y,
+          conf: keypoints[RIGHTWRIST].score
+          }
+        }
+        const robotData = {
+          wristDelta: estWristDelta,
+          nose: userPosition.nose,
+          userAngle: userAngle,
+          userDist: estimatedDist,
+        }
+    
+        mqttClient.sendRobot(robotData)
     }
 
     mqttClient.sendKeypoints(keypoints)
@@ -315,7 +336,7 @@ const normalizeUserPlacementPositions = function (
   } else if (nose.position.x <= verticalSplit && nose.position.x >= leftEdge) {
     position.nose.x = computePercentage(nose.position.x, leftEdge, verticalSplit) - 1
   }
-  if (nose.position.y <= ZONEHEIGHT && nose.position.y <= ZONEOFFSET) {
+  if (nose.position.y <= ZONEHEIGHT && nose.position.y >= ZONEOFFSET) {
     position.nose.y = computePercentage(nose.position.y, ZONEHEIGHT, ZONEOFFSET)
   }
 
