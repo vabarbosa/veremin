@@ -274,12 +274,12 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
         left: {
           x: keypoints[LEFTWRIST].position.x - keypoints[LEFTSHOULDER].position.x,
           y: keypoints[LEFTWRIST].position.y - keypoints[LEFTSHOULDER].position.y,
-          wristConfidence: keypoints[LEFTWRIST].score
+          conf: keypoints[LEFTWRIST].score
         }, 
          right: {
           x: keypoints[RIGHTSHOULDER].position.x - keypoints[RIGHTSHOULDER].position.x,
           y: keypoints[RIGHTSHOULDER].position.y - keypoints[RIGHTSHOULDER].position.y,
-          wristConfidence: keypoints[RIGHTWRIST].score
+          conf: keypoints[RIGHTWRIST].score
           }
         }
         const robotData = {
