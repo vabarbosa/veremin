@@ -421,6 +421,7 @@ const bindPage = async function () {
 window.toggleVeremin = function () {
   paused = !document.getElementById('toggle-checkbox').checked
   console.log(`${paused ? 'Pausing' : 'Resuming'} Veremin`)
+  document.getElementById('v-status').innerText = paused ? 'paused' : ''
 }
 
 // update environment info

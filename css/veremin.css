@@ -3,6 +3,7 @@
 :root {
   --teal-30: #20d5d2;
   --teal-10: #dbfbfb;
+  --alert: red;
   
   --primary-back: var(--teal-30);
   --secondary-back: var(--teal-10);
@@ -42,6 +43,10 @@ header > span {
 
 header > span:first-of-type {
   font-size: xx-large;
+}
+
+#v-status {
+  color: var(--alert);
 }
 
 #btn-grp {
@@ -362,21 +367,21 @@ footer {
 }
 .toggle-btn-ui {
   position: relative;
-  width: 32px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
 }
 .toggle-btn-ui::before {
   position: absolute;
   display: block;
   content: '';
-  border: 1.5px solid;
+  border: 1.5px solid var(--alert);
   cursor: pointer;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  height: 17px;
-  width: 30px;
+  height: 24px;
+  width: 16px;
   border-radius: 0.9375rem;
-  top: 4px;
+  left: 4px;
   will-change: box-shadow;
   -webkit-box-shadow: 0 0 0 2px transparent;
   box-shadow: 0 0 0 2px transparent;
@@ -391,11 +396,11 @@ footer {
   position: absolute;
   display: block;
   cursor: pointer;
-  left: 3px;
-  top: 7px;
+  left: 7px;
+  top: 3px;
   width: 10px;
-  height: 11px;
-  border: 1.5px solid;
+  height: 10px;
+  border: 1.5px solid var(--alert);
   border-radius: 50%;
   content: '';
   -webkit-transition: -webkit-transform 70ms cubic-bezier(0.2, 0, 1, 0.9);
@@ -407,11 +412,12 @@ footer {
   -webkit-box-shadow: 0 0 0 2px transparent;
   box-shadow: 0 0 0 2px transparent;
 }
-/* .toggle-btn-input:checked + .toggle-btn-label .toggle-btn-ui::before {
-  background-color: var(--teal-10);
-} */
+.toggle-btn-input:checked + .toggle-btn-label .toggle-btn-ui::before {
+  border-color: currentColor;
+}
 .toggle-btn-input:checked + .toggle-btn-label .toggle-btn-ui::after {
   background-color: currentColor;
-  -webkit-transform: translateX(14px);
-  transform: translateX(14px);
+  border-color: currentColor;
+  -webkit-transform: translateY(7px);
+  transform: translateY(7px);
 }
