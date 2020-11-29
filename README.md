@@ -147,7 +147,7 @@ After the model is loaded, the video stream from the web camera will appear and 
 - Move your right hand/arm up and down (in the right zone) to generate different notes
 - Move your left hand/arm left and right (in the left zone) to adjust the velocity of the note.
 
-Click on the Controls icon (top right) to open the control panel. In the control panel you are able to change MIDI devices (if more than one is connected), configure PoseNet settings, set what is shown in the overlay, enable MQTT, and configure additional options. More information about the control panel options is available [here](https://github.com/vabarbosa/veremin/blob/master/CONTROLPANEL.md).
+Click on the Controls icon (top right) to open the control panel. In the control panel you are able to change MIDI devices (if more than one is connected), configure PoseNet settings, set what is shown in the overlay, enable MQTT, and configure additional options. More information about the control panel options is available [here](https://github.com/vabarbosa/veremin/blob/main/CONTROLPANEL.md).
 
 ## Links
 
