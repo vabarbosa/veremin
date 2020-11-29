@@ -18,7 +18,7 @@ PoseNet is used to predict the location of your wrists within the video. The app
 
 Browsers must allow [access to the webcam](https://caniuse.com/#feat=stream) and support the [Web Audio API](https://caniuse.com/#feat=audio-api). Optionally, to integrate with a MIDI device the browser will need to support the [Web MIDI API](https://caniuse.com/#feat=midi) (e.g., Chrome browser version 43 or later). 
 
-If you would like to use the pose estimation to control another device you can turn on MQTT to publish the data to an MQTT broker which other devices can subscribe to.
+If you would like to use the pose estimation to control another device you can turn on MQTT to publish the data to an MQTT broker (that supports WebSockets). Other devices or application can then subscribe to receive the positional data.
 
 ## Watch the video
 
@@ -138,7 +138,7 @@ In addition, if it supports the [Web MIDI API](https://caniuse.com/#feat=midi), 
 
 If your browser does not support the Web MIDI API or no (hardware or software) synthesizer is detected, the app defaults to using the Web Audio API to generate tones in the browser.
 
-Publishing to an MQTT broker over Websockets is also possible. You can configure the broker to send messages to. Some keypoints returned by the PoseNet model along with some additional computed values (i.e., distance, angle, etc.) are sent to the broker.
+Publishing to an MQTT broker over WebSockets is also possible. You can configure the broker to send messages to. Some keypoints returned by the PoseNet model along with some additional computed values (i.e., distance, angle, etc.) are sent to the broker.
 
 Open your browser and go to the app URL. Depending on your browser, you may need to access the app using the **`https`** protocol instead of the **`http`**. You may also have to accept the browser's prompt to allow access to the web camera. Once access is allowed, the PoseNet model gets loaded (it may take a few seconds).
 
