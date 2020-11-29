@@ -63,8 +63,8 @@ Below options are available for configuration in the control panel:
 |---|---|---|
 | on | `false` | Whether or not to publish position data to configured MQTT broker. |
 | secureWebsocket | `true` | Whether or not to try to connect to MQTT broker using a secure WebSocket connection. |
-| brokerUrl | `mqtt.eclipse.org` | The URL to a MQTT broker that supports WebSockets. |
-| brokerPort | `443` | The WebSockets port for the MQTT broker. |
+| brokerUrl | `test.mosquitto.org` | The URL to a MQTT broker that supports WebSockets. Some publically-accessible MQTT brokers can be found [here](https://github.com/mqtt/mqtt.org/wiki/public_brokers) |
+| brokerPort | `8081` | The WebSockets port for the MQTT broker. |
 | eventTopic | `veremin/{event}` | The topic to use to publish MQTT messages. If the topic consists of the string `{event}`, it will be replaced with the appropriate message event type (i.e., `nose`, `angle`, etc.). |
 | clientId | _blank_ | Unique ID to use to identify the client when sending messages. If left blank a unique ID is generated and used. |
 | username | _blank_ | The username to use when connecting the MQTT broker (if the broker requires credentials). |

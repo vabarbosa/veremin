@@ -44,8 +44,8 @@ export let guiState = {
     // Turn on publishing of user position data via MQTT
     on: false,
     secureWebsocket: true,
-    brokerURL: 'mqtt.eclipse.org',
-    brokerPort: 443,
+    brokerURL: 'test.mosquitto.org',
+    brokerPort: 8081,
     eventTopic: 'veremin/{event}',
     clientId: '',
     username: '',
