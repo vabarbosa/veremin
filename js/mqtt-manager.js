@@ -72,7 +72,9 @@ export class MqttClient {
       onFailure: (message) => {
         console.error(`Connection failed: ${message.errorMessage}`)
         this._initialConnectDone = false
-      }
+      },
+      reconnect: true,
+      keepAliveInterval: 1
     }
 
     if (this._username || this._password) {
