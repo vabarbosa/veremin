@@ -145,21 +145,10 @@ export class MqttClient {
     if (!this._initialConnectDone) {
       return
     }
-    // if (!client.connected) {
-    //   // Multiple reconnect events firing at once was a problem. This check
-    //   // causes us to drop messages while reconnecting to make sure that isn't a problem.
-    //   // Dropping messages while we don't have a connection in this use case should be fine.
-    //   if(!reconnecting) {
-    //     reconnect().then(function() {
-    //       client.publish(topic, JSON.stringify(data), {}, console.log)
-    //     })
-    //   }
-    // } else {
     const dataStr = JSON.stringify(data).replaceAll(/\.[0-9]+/g, this._replacer)
     const message = new Paho.Message(dataStr)
     message.destinationName = topic
     this.client.send(message)
-    // }
   }
 
   _replacer (match) {
