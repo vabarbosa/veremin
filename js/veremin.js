@@ -277,8 +277,8 @@ const processPose = function (score, keypoints, minPartConfidence, topOffset, no
           conf: keypoints[LEFTWRIST].score
         }, 
          right: {
-          x: keypoints[RIGHTSHOULDER].position.x - keypoints[RIGHTSHOULDER].position.x,
-          y: keypoints[RIGHTSHOULDER].position.y - keypoints[RIGHTSHOULDER].position.y,
+          x: keypoints[RIGHTWRIST].position.x - keypoints[RIGHTSHOULDER].position.x,
+          y: keypoints[RIGHTWRIST].position.y - keypoints[RIGHTSHOULDER].position.y,
           conf: keypoints[RIGHTWRIST].score
           }
         }
